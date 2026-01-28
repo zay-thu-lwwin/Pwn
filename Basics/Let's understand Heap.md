@@ -2,7 +2,7 @@
 
 
 ## Glibc
-	Glibc (GNU C Library) က Linux operating system အတွက် standard C library အဓိကတစ်ခုဖြစ်။ 
+	Glibc (GNU C Library) က Linux operating system အတွက် standard C library အဓိကတစ်ခုဖြစ်။ fff
 
 
 
