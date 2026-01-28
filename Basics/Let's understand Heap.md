@@ -249,13 +249,13 @@ bin 5 မျိုးရှိတယ်
 ## 1. Tcache bin
 
 	 Request size < 0x410 bytes ဆိုရင် malloc က ဒီကောင် ကို ပထမဆုံး check လုပ်တယ် multi-threaded program တွေမှာ heap lock contention ကိုလျှော့ချဖို့ ဒီဇိုင်းလုပ်ထားတာဖြစ်တယ် glibc malloc allocator မှာ multi-threaded performance ကိုမြှင့်တင်ဖို့အတွက် မိတ်ဆက်ထားတဲ့ mechanism တစ်ခုဖြစ်ပါတယ်။  glibc 2.26 (2017) (Modern Malloc) ကစပြီးထည့်သွင်းခဲ့။ singly linked list ကိုသုံး။binပေါင်း 64 bin ပါ။ Bin တစ်ခုစီက chunk size range တစ်ခုကို ကိုယ်စားပြုပြီး maximum chunk  7 ခု ထိဘဲရ။ အရင် bin တွေဖြစ်တဲ့ fastbin, smallbin, unsortedbin, largebin တွေဟာ main arena ထဲမှာရှိပြီး lock လိုအပ်။ race conditions လို exploit တွေကာကွယ်ပေးနိုင်အောင်သုံးပါတယ်
+![](./pictures/threads.png)
 
-![[threads.png]]
 
 
 ## 2. Fast bin
+![](./pictures/bins-fast.png)
 
-![[bins-fast.png]]
 
 	 multi thread မဟုတ် or tcache binထဲမရှိရင် fast binကို ကြည့်
 	ချက်ချင်းပြန်သုံးလို့ရအောင်လုပ်တာဆိုတော့ fast bin က အမှန်တကယ် free လုပ်ထားတဲ့ကောင်မဟုတ်ဘူး 
@@ -282,15 +282,16 @@ Bin 9: 88-byte chunks
 
 
 ## 3. Small Bin
+![](./pictures/bins-small.png)
 
-![[bins-small.png]]
 	
 	number of bins = 62 (each contain from 6 bytes to 512 bytes in 32bit system and  32 bytes to 1024 bytes in 64 bit system) and fixed sized ဖြစ်တယ် doubly linked list (Fist in Fisrt Out) အရင်ဝင်တဲ့ကောင် အရင်ထွက်တယ် ဆိုတော့ fd bk နှစ်ခုလုံးသုံးတယ် Coalescing လုပ်တယ်
 
 
 ## 4. Unsorted Bin 
 
-![[bins-unsorted.png]]
+
+![](./pictures/bins-unsorted.png)
 
 	ptmalloc2 ရဲ့ optimizing cache layer ။ 
 	1 bin ထဲဘဲရှိတယ် free chunk တွေကို neighbour chunkတွေနဲ့ coalesces လုပ်တယ် temporary အနေနဲ့ဘဲသုံးတယ် လိုအပ်တဲ့ size နဲ့ ကိုက်ညီရင် split လုပ်ပြီး ယူတယ် မကိုက်ရင် ဒီ chunk ကို small/large bin ထဲ ပြန်ထည့်တယ်။ circular ပုံစံဖြစ်တယ် doubly linked list ဖြစ်တယ်
@@ -320,8 +321,8 @@ Large Bin 64 (512-576 bytes):
 ```
 
 
-![[bins-large.png]]
 
+![](./pictures/bins-large.png)
 
 ---
 
@@ -372,7 +373,8 @@ chunk2 ကို free လုပ်လိုက်ရင် free chunk1 နဲ့
 ပုံမှန် binထဲကထုတ်မယ်ဆိုရင်    (binထဲကထုတ်မယ့် chunk က chunkA ဆိုပါစို့) chunk Aကို bin ထဲကထုတ်မယ်ဆိုရင် chunkA ရဲ့ fd ညွှန်းနေတဲ့ FD chunk ကိုအရင်သွားကြည့်ပြီး  FD chunk ရဲ့ bk (chunk Aကိုညွှန်းနေတာ) ကို  chunkA ရဲ့ bkနဲ့ overwrite, ပြီးရင်  chunk Aကို bin ထဲကထုတ်မယ်ဆိုရင် chunkA ရဲ့ bk ညွှန်းနေတဲ့ BK chunk ကိုအရင်သွားကြည့်ပြီး  BK chunk ရဲ့ fd (chunk Aကိုညွှန်းနေတာ) ကို  chunkA ရဲ့ fdနဲ့ overwrite ဆို့တော့ BK process က နောက်မှလာတယ်
 ဆိုတော့ အဲ global variable မှာနောက်ဆုံးကျန်ရှိမယ့် value က BK chunk fd ကို ကို overwrite မယ့် global variable အထက် 3ဆ(0x18)အကွာမှာ ရှိနေမယ့် address ဘဲဖြစ်ပါတယ် () global variable - 0x18)
 
-![[unlink-1.jpg]]
+
+![](./pictures/unlink-1.jpg)
 
 example: https://guyinatuxedo.github.io/30-unlink/unlink_explanation/index.html
 
@@ -696,16 +698,16 @@ constraints:
 	[4] 0x60 (96) ဒီကကောင်နဲ့ အပေါ်က poninter နဲ့က တူတူဘဲ 
 
 
-![[0ctf-1.png]]
+![](./pictures/0ctf-1.png)
 
-![[0ctf-2.png]]
 
+![](./pictures/0ctf-2.png)
 
 	0x555555e01100 ဘဲ သွားကျနေတယ် part 1က  pointer က free မလုပ်လိုက်ဘူးဆိုတော့သုံးလို့ရယ်
 	ဒီနေရာမှာ သူ့ index ကို သုံးလို့ရသေးတယ်ပေါ့ nightmare မှာ index 0 , part 2 ကလည်း index ထပ်ပေး (index 5)
 	
+![](./pictures/0ctf-3.png)
 
-![[0ctf-3 1.png]]
 
 	fast bin ထဲမှာလည်း ဘာမှ မရှိသေး ဆိုတော့ fast bin attack လုပ်ဖို့ fast binထဲထည့်ရမယ် index0 , index5 ptr နှစ်ခု လုံးကို ထည့်ရမယ် ပြီးရင် index တစ်ခုကို allocate ယူ ဆိုတော့ ptr တစ်ခုက allocate , ptr တစ်ခုက free , ‌allocat ထားတဲ့ ptr ကို သုံးပြီး data ထည့် , free လုပ်ထားတဲ့ ptr ကို data ထည့်သလိုဖြစ်သွား ,cuz both pointers have the same memory address, 
 	ဆိုတော့ fast bin ထဲကို ptrတွေထည့်မယ် ဒါမဲ့ bin ထဲမှာ နှစ်ခုလုံး တစ်ဆက်တည်းဖြစ်လို့မရဘူး ကြားခံထားပြီးထည့်မယ် index 4ကိုသုံးမယ်
@@ -716,11 +718,11 @@ free(5)
 free(4)
 free(0)
 ```
+![](./pictures/0ctf-4.png)
 
-![[0ctf-4.png]]
 
+![](./pictures/0ctf-5.png)
 
-![[0ctf-5.png]]
 
 	ပြီးရင် allocate 0x60(96) နှစ်ခါယူမယ်  fast  binထဲကကောင်တွေနဲ့ size ကိုက်တော့ binထဲကကောင်တွေနဲ့ဘဲသုံးမယ် binထဲကနှစ်ကောင်ယူမယ် fast bin က fast in last out ဆိုတော့ နောက်ဆုံးထည့်ကောင်ကစယူမယ် 0 ယူ ပြီးရင် 4 ယူ ဆိုတော့ ဒီနေရာမှ fast bin exploit စလို့ရပီ same ptr , ptr တစ်ကောင်က binထဲမှာ တစ်ကောင်က allocate, allocate ဖြစ်ထားတဲ့ ptrကောင်ကို သုံးပြီး data ထည့်မယ် (binထဲကကောင်ဆိုerror တက်မယ် binထဲကကောင်ပါဆို မှ data ထည့်လို့မှမရတာ) 
 	ဒီနေရာမှာ ဘာထည့်မှာလဲဆို fd ဖြစ်မယ့်ကောင်ကိုထည့်မယ် fast binတွေက fdတွေဘဲသုံး 
@@ -817,9 +819,9 @@ if ((&flag_1_or_not)[index * 6] == 1)  // condition fail ဖြစ်မယ်``
 	ဆိုတော့ စလိုက်ရအောင်
 	 အရင်ဆုံး insert ကို 0x20 နှစ်ခါယူလိုက်တယ် index 0 နဲ့ index 1 ပေးတယ် merge သုံးပြီး from 0 နဲ့ to 0 ပေးလိုက်တယ်  ဆိုတော့ from 0 အနေနဲ့က index 0 က unsorted bin ထဲရောက်သွားပြီး to 0 အနေနဲ့လည်း index0 နေရာ ကို index 2 အနေနဲ့ပေးလိုက်တယ် ဆိုတော့ unsorted bin ထဲကကောင်ကို data access လုပ်လို့ရ data edit လုပ်လို့ရသလိုဖြစ်သွားမယ် view နဲ့ index2ကိုကြည့်လိုက်ရင် fd နဲ့ bk နေရာက main_arena+88 address ကိုရ ထုံးစံအတိုင်း libc တွက်။ ပြီးရင် ငါတို့ overwrite မယ့်ကောင် ရဲ့ offset ရှာပြီဂ address ကိုပါတွက်။ 
 	 ဆိုတော့ နောက်တစ်ဆင့်မစခင် fd နဲ့ bk တွေ ဘယ်လိုအလုပ်လုပ်သွားလဲဆိုတာမြင်ဖို့လိုတယ် တကယ် theory ပိုင်းမဟုတ်ဘဲ မျက်လုံးထဲမြင်မှ နောက်တစ်ဆင့် expoit ကို ချက်ချင်းတန်းအဖြေရမှာ
+![](./pictures/zero-3.jpg)
 
 
-![[zero-3.jpg]]
 
 ပုံမှန် bin ထဲက free chunk တစ်ခုစီမှာ သူ့ဆီကထွက်သွားတဲ့မြှားနှစ်ခု ရှိတယ် အပေါ်တစ်ခု အောက်တစ်ခုပေါ့ (ရှေ့နောက်လည်းပြောလို့ရ) သူဆီဝင်တဲ့ မျှားနှစ်ခုလည်း ရှိတယ် အဝင်နှစ်ခု အထွက်နှစ်ခုပေါ့။  ဆိုတော့ပုံမှာအပြဝိုင်းပြထားတဲ့ ကောင်ကို binထဲက ထုတ်မယ်ဆိုရင်  အဲchunk ရဲ့ အဝင်မျှားကို direction တူရာ အထွက်မျှားနဲ့ overwrite လုပ်ပါတယ် ဆိုတော့ ထုတ် လုပ်မယ့်ကောင်ရဲ့ fd ကို value က သူ့အောက်က chunk ရဲ့ fd value ကို overwrite လုပ်ပါတယ် ဆိုတော့ ထုတ် လုပ်မယ့်ကောင်ရဲ့ bk ကို value က သူ့အထက်က chunk ရဲ့ bk value ကို
 overwrite လုပ်ပါတယ် 
@@ -828,8 +830,8 @@ overwrite လုပ်ပါတယ်
 ဆိုတော့ unsorted binထဲက free chunk တစ်ခုထဲ အခြေအနေ ကိုကြည့်ရအောင်
 
 unsorted ထဲ bin ကိုယ်တိုင်ကလည်း chunk တစ်ခုလိုပါဘဲ unsorted bin က circular doubly linked list ပုံစံနဲ့ရှိလို့ပါ unsorted bin ‌address က main_arena  နဲ့ offset 0x58 အကွာမှာရှိတာပါ အပေါ်က leak ဒါကလည်း unsorted bin address ပါ
+![](./pictures/zero-4.jpg)
 
-![[zero-4.jpg]]
 
 
 ဆိုတော့ unsorted binထဲ free chunk တစ်ခုရောက်ရင် chunk နှစ်ခုရသလိုဖြစ်ပြီး တစ်ခုကိုတစ်ခု pointer ညွှန်းနေကြတာပါ 
@@ -842,7 +844,7 @@ unsorted bin ရဲ့ fd နဲ့ bk က binထဲကထုတ်မယ့် 
 ဒီနေရာမှာက unsorted binက သူ့ address သူ fd နဲ့ bkမှာရသွားပါတယ်
 ဆိုတော့   binထဲကထုတ်မယ့် chunk  fd နဲ့ bk ကို အခြား valueတွေထားပြီး free လုပ်ရင် ဘယ်လိုဖြစ်မလဲ???
 
-![[./pictures/zero-6.jpg]]
+![](./pictures/zero-6.jpg)
 
 
 unsorted binရဲ့ fd , bk  value တွေက ငါတို့ချိန်းထားတဲ့ fd bk value တွေ ရသွားမှာပါ
