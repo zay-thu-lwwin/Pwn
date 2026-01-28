@@ -4,6 +4,11 @@
 ## Glibc
 	Glibc (GNU C Library) က Linux operating system အတွက် standard C library အဓိကတစ်ခုဖြစ်။ 
 
+
+
+![](pwn_repo/Basics/zero-3.jpg)
+
+
 ```
 Glibc က 4 အဓိက လုပ်ဆောင်ချက်တွေလုပ်ပေးတယ်:
 
