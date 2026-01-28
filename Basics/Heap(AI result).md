@@ -1977,6 +1977,6 @@ void handle_request(int client_fd) {
 https://chat.deepseek.com/share/nxl539xo4zznfglai3
 ---
 To recap: the initial (“main”) arena contains only the main heap which lives just after the where the program binary is loaded into memory, and is expanded using _sbrk_. This is the only arena that is used for single-threaded applications. On multithreaded applications, new threads are given secondary arenas from which to allocate. Using arenas speeds up the program by reducing the likelihood that a thread will need to wait on a mutex before being able to perform a heap operation. Unlike the main arena, these secondary arenas allocate chunks from one or more _subheaps_, whose location in memory is first established using _mmap_, and which grow by using _mprotect_
---
+
 
 ---

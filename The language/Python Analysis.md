@@ -87,8 +87,6 @@ print(D.__mro__)
 `__globals__` သည် Python function objects တွေမှာရှိတဲ့ attribute တစ်ခုဖြစ်ပြီး function ရဲ့ global namespace ကို reference လုပ်ပေးပါတယ်။
 
 
-
-
 ---
 
 ### `Input() in python 2.7`
@@ -98,8 +96,6 @@ print(D.__mro__)
 	Python 3 မှာ input() က string ကိုပဲ return ပြန်ပေးပါတယ်
 	 Python 2.7 မှာ input() က user ရိုက်ထည့်တဲ့ code ကို evaluate လုပ်ပါတယ် (eval လိုမျိုး)
 	
-
-
 ---
 
 1. **`elf.symbols['read']`** က:
@@ -108,10 +104,4 @@ print(D.__mro__)
         
     - **PIE enabled** ဆိုရင် → **offset from base** ပြန်ပေး
         
-2. **ဒီ challenge မှာ** PIE disabled ဖြစ်လို့ addresses တွေက fixed
-    
-3. **exploit က hardcoded addresses သုံးထားတာ** ဘာလို့လဲဆိုတော့ ROPgadget နဲ့ရှာပြီး ရေးထားလို့
-    
-4. - မင်းတွေးတာ မှန်တယ်။ ဒါက offset ပဲပေးသင့်တယ်၊ ဒါပေမယ့် PIE disabled ဖြစ်နေလို့ absolute address ဖြစ်သွားတာ
-
 ---
