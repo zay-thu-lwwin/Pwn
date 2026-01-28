@@ -1,0 +1,221 @@
+
+``
+```
+readelf -s /usr/lib/x86_64-linux-gnu/libc.so.6 | grep " system"
+ strings -t x /lib/x86_64-linux-gnu/libc.so.6 | grep "/bin/sh"
+ objdump -T /lib/x86_64-linux-gnu/libc.so.6 | grep "malloc"
+ objdump -t /lib/x86_64-linux-gnu/libc.so.6 | grep "malloc"
+ find &system, +9999999, "/bin/sh"
+ info proc mappings
+ vmmap libc / system
+ search -t strings "/bin/sh"
+ ldd secureserver
+```
+
+Libc method script
+https://chat.deepseek.com/share/cb4lsfetxtyuoadyi2
+
+
+## `Libc  (C Standard Library)
+
+
+	C Programming ရဲ့ နှလုံးသားနဲ့ အသက်သွေးကြောလို့ပြောလို့ရ
+	C Program တိုင်းနီးပါး သုံးရတဲ့ Basic Functions တွေ စုထားတဲ့ Library
+	OS နဲ့ Program အကြားမှာ Interface Layer အဖြစ်ဆောင်ရွက်
+	Libc မရှိရင် C Program အများစု Run လို့မရ
+
+
+```
+HIGH ADDRESS
+┌─────────────────────────────┐
+│ Kernel Space                │
+├─────────────────────────────┤
+│ Stack                       │
+├─────────────────────────────┤
+│ ↓                           │
+│ ↑                           │
+├─────────────────────────────┤
+│ Shared Libraries (Libc)     │ ← 0x7ffff7a00000 (ASLR randomized)
+│   printf(), system(), etc.  │
+├─────────────────────────────┤
+│ Heap                        │
+├─────────────────────────────┤
+│ .data/.bss/.got             │
+├─────────────────────────────┤
+│ .text/.plt/.rodata (Binary) │ ← 0x400000
+└─────────────────────────────┘
+LOW ADDRESS
+```
+
+	system ASLR သုံးတယ်
+	
+```bash
+# Libc loads at different addresses each run
+$ ldd ./vuln
+    libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x7ffff7a00000)  # Run 1
+    # Next run: 0x7ffff7b00000, 0x7ffff7c00000, etc.
+```
+
+	libc version check ရန်
+	
+```bash
+# Method 1: Direct from libc
+$ /lib/x86_64-linux-gnu/libc.so.6
+GNU C Library (Ubuntu GLIBC 2.31-0ubuntu9.9) stable release version 2.31.
+
+# Method 2: From binary
+$ ldd --version /lib/x86_64-linux-gnu/libc.so.6
+ldd (Ubuntu GLIBC 2.31-0ubuntu9.9) 2.31
+
+# Method 3: Check symbols
+$ readelf -s /lib/x86_64-linux-gnu/libc.so.6 | grep "GLIBC_" | head -5
+```
+
+	funciton, string offset ရှာရန်
+	
+```bash
+# Get offset of system() from Libc base
+$ readelf -s /lib/x86_64-linux-gnu/libc.so.6 | grep " system"
+  1405: 0000000000055410   139 FUNC    WEAK   DEFAULT   16 system@@GLIBC_2.2.5
+# system offset = 0x55410
+
+# Get offset of puts()
+$ readelf -s /lib/x86_64-linux-gnu/libc.so.6 | grep " p uts"
+  1316: 0000000000087aa0   512 FUNC    WEAK   DEFAULT   16 puts@@GLIBC_2.2.5
+# puts offset = 0x87aa0
+
+# Get "/bin/sh" string offset
+$ strings -t x /lib/x86_64-linux-gnu/libc.so.6 | grep "/bin/sh"
+ 1d8698 /bin/sh
+# /bin/sh offset = 0x1d8698
+
+#get offset with objdump 
+objdump -T /lib/x86_64-linux-gnu/libc.so.6 | grep -E "system|exit"
+
+```
+
+
+	Gadget တွေရှာရန်
+
+```bash
+# One-liner gadgets in Libc
+$ objdump -d /lib/x86_64-linux-gnu/libc.so.6 | grep -B1 "ret" | grep -A1 "pop"
+
+# Common gadgets
+$ ROPgadget --binary /lib/x86_64-linux-gnu/libc.so.6 | grep "pop rdi"
+0x0000000000023b6a : pop rdi ; ret
+```
+
+	one_gadget ရှာရန်
+
+```bash
+# Find magic addresses in libc that give shell directly
+one_gadget /lib/x86_64-linux-gnu/libc.so.6
+#Output: `0x45526 execve("/bin/sh", rsp+0x30, environ)`
+```
+
+---
+
+#### `Libc ထဲမှာ ဘာတွေပါလဲဆို
+
+##### ` Common Libc Functions:
+```c
+// Memory Operations
+malloc(), free(), memcpy(), memset()
+
+// String Operations  
+strcpy(), strcat(), strlen(), printf(), scanf()
+
+// File Operations
+fopen(), fread(), fwrite(), fclose()
+
+// Process Operations
+system(), execve(), fork(), exit()
+
+// Network Operations
+socket(), connect(), bind()
+```
+
+##### `Real Example - Simple C Program:
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main() {
+    char *buffer = malloc(100);     // Libc function
+    strcpy(buffer, "Hello");        // Libc function  
+    printf("%s\n", buffer);         // Libc function
+    free(buffer);                   // Libc function
+    return 0;
+}
+```
+
+
+---
+
+## `Libc Vs Binary file`
+
+
+```
+Process Memory:
+┌─────────────────────────────┐
+│ 0x400000: YOUR BINARY       │ ← မင်းရေးတဲ့ code
+│   ├── main()                │
+│   ├── your_functions()      │
+│   ├── puts@plt (stub)       │
+│   └── puts@got (pointer)    │
+├─────────────────────────────┤
+│ 0x7ffff7a00000: LIBC        │ ← System library
+│   ├── printf()              │
+│   ├── puts()                │
+│   ├── read()                │
+│   ├── system()              │
+│   └── execve()              │
+└─────────────────────────────┘
+```
+
+
+```
+/lib/x86_64-linux-gnu/libc.so.6 contains:
+┌─────────────────────────┐
+│ printf() - 500+ lines   │ ← Format printing
+│ puts() - 100+ lines     │ ← String printing
+│ gets() - 50+ lines      │ ← Input (dangerous!)
+│ scanf() - 300+ lines    │ ← Formatted input
+├─────────────────────────┤
+│ malloc() - 1000+ lines  │ ← Memory allocation
+│ free() - 800+ lines     │ ← Memory deallocation
+├─────────────────────────┤
+│ read() - 200+ lines     │ ← System call wrapper
+│ write() - 150+ lines    │ ← System call wrapper
+├─────────────────────────┤
+│ system() - 100+ lines   │ ← Shell command execution
+│ execve() - 50+ lines    │ ← Program execution
+├─────────────────────────┤
+│ exit() - 30+ lines      │ ← Process termination
+│ _start() - 20+ lines    │ ← Program startup
+├─────────────────────────┤
+│ fopen(), fclose()       │ ← File operations
+│ strlen(), strcpy()      │ ← String operations
+│ rand(), srand()         │ ← Random numbers
+│ time(), sleep()         │ ← Time functions
+├─────────────────────────┤
+│ /bin/sh string          │ ← Common in exploits
+│ /bin/bash string        │
+└─────────────────────────┘
+```
+
+
+```
+Libc က PWN ရဲ့အဓိကသော့ချက်
+Libc address မသိရင် system() မခေါ်နိုင်
+Libc leak ကတစ်ခါလုပ်ရုံ၊ ပြီးရင် ASLR ကိုကျော်နိုင်
+CTF မှာ Libc version ကိုသတိထား (local vs remote မတူနိုင်)
+```
+---
+
+https://libc.blukat.me/?q=__libc_start_main_ret%3Ae81%2C_IO_2_1_stdin_%3A5c0&l=libc6_2.27-0ubuntu2_i386
+
+
+https://libc.rip/
