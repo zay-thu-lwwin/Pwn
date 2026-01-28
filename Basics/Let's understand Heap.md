@@ -236,7 +236,7 @@ Malloc ကဘယ်လိုနေရာယူလဲဆိုရင်
 	ဒီနေရာမှာ secondary arena က heap နဲ့ တစ်ဆက်တည်းမဟုတ်ပါဘူး shared library region လိုနေရာမှာ memory အသစ် တစ်ခု create လုပ်သလိုဖြစ်ပါတယ် memory ပေါ်မှာ ကွက်ကြားကွက်ကြားရှိတဲ့       သဘောမျိူးပါဘဲ
 
 
-![[./pictures/heap-arenas-CS.png]]
+![](./pictures/heap-arenas-CS.png)
 
 
 ## Allocating  From  Free'd chunks (from bins)
