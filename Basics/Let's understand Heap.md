@@ -1,13 +1,12 @@
-![](pwn_repo/Basics/zero-3.jpg)
+![](./zero-3.jpg)
 
 
 ## Glibc
-	Glibc (GNU C Library) က Linux operating system အတွက် standard C library အဓိကတစ်ခုဖြစ်။ fff
-	jfdfd
+	Glibc (GNU C Library) က Linux operating system အတွက် standard C library အဓိကတစ်ခုဖြစ်။ f#
 
 
 
-![](pwn_repo/Basics/zero-3.jpg)
+
 
 
 ```
