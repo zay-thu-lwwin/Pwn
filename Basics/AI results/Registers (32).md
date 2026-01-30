@@ -1,4 +1,4 @@
-**x86 (32-bit) Architecture Registers အပြည့်အစုံ**
+x86 (32-bit) Architecture Registers အပြည့်အစုံ
 
 ## 1. **General Purpose Registers** (8-bit, 16-bit, 32-bit versions ရှိ)
 

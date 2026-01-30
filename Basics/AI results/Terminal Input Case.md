@@ -2,9 +2,8 @@
 
 
 
-# **Terminal က သင့်ရဲ့ Hex Address Input ကို ဘယ်လိုမြင်ပြီး ဘယ်လိုသိမ်းသလဲ**
+### Terminal က သင့်ရဲ့ Hex Address Input ကို ဘယ်လိုမြင်ပြီး ဘယ်လိုသိမ်းသလဲ
 
-ဒီအကြောင်းကို အဆင့်ဆင့် ရှင်းပြပါမယ်။
 
 ## **၁။ Terminal Input Pipeline**
 
