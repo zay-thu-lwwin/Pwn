@@ -5,5 +5,7 @@ canary value က program run time တစ်ခုမှာ function တိုင
 
 ## Bypass 
 
+	Canary value ကို leak လုပ်နိုင်ရင် 
+	stack canary protection ကို bypass လုပ်လို့ရ
 	prinf vuln နဲ့ canary value ကိုဖတ်ယူ
-	Buffer overflow လုပ်ရင် မပျက်အောင် အဲ့တန်ဖိုးကိုပြန်ထည့် (ASLR)
+	Buffer overflow လုပ်ရင် မပျက်အောင် အဲ့တန်ဖိုးကိုပြန်ထည့် 
