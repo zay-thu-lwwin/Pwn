@@ -3,3 +3,6 @@ Function ပြီးသွားရင် canary value ပျက်သွား
 Value ပြောင်းသွားရင် program က crash ဖြစ် (Stack Smashing Detected!)
 
 ## Bypass 
+
+	prinf vuln နဲ့ canary value ကိုဖတ်ယူ
+	Buffer overflow လုပ်ရင် မပျက်အောင် အဲ့တန်ဖိုးကိုပြန်ထည့် (ASLR)
