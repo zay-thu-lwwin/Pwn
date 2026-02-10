@@ -1,3 +1,15 @@
+```
+User က ./program ကို run
+↓
+Kernel က process တစ်ခု create
+↓
+ld.so (dynamic linker) က libc တင်သုံး  
+↓
+libc ရဲ့ __libc_start_main() က canary generate
+↓
+main() function ကိုခေါ်
+```
+
 Function စခေါ်တဲ့အခါ မှာ saved `ebp` ပြီးရင် canary value ကိုထည့်ထားတယ်
 Function ပြီးသွားရင် canary value ပျက်သွားလားစစ်
 Value ပြောင်းသွားရင် program က crash ဖြစ် (Stack Smashing Detected!)
