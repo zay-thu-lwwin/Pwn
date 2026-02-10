@@ -10,6 +10,27 @@ libc ရဲ့ __libc_start_main() က canary generate
 main() function ကိုခေါ်
 ```
 
+```
+# Kernel က entropy sources တွေကနေ random data ထုတ်
+# - Mouse movements
+# - Keyboard timings  
+# - Disk I/O timings
+# - Interrupt timings
+
+# /dev/urandom ထဲမှာ သိမ်းထား
+$ cat /proc/sys/kernel/random/entropy_avail
+2564  # Available random bits
+```
+
+```
+# TLS (Thread Local Storage) setup
+# fs:0x28 မှာ canary သိမ်း
+
+mov    rax, QWORD PTR fs:0x28  # canary ကိုယူ
+mov    QWORD PTR [rbp-0x8], rax  # stack ပေါ်တင်
+```
+
+
 Function စခေါ်တဲ့အခါ မှာ saved `ebp` ပြီးရင် canary value ကိုထည့်ထားတယ်
 Function ပြီးသွားရင် canary value ပျက်သွားလားစစ်
 Value ပြောင်းသွားရင် program က crash ဖြစ် (Stack Smashing Detected!)
