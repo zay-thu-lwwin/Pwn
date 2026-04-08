@@ -17,6 +17,7 @@ continue
 break *main+59
 info break (i b)
 delete break 1
+del 1
 run
 info registers eax (register)
 x/4xb $rbp-0x4 (memory)
