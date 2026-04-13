@@ -87,4 +87,4 @@ pwndbg> x/4wx &num
 
 # View as decimal
 pwndbg> x/1dw &num
-0x7fffffffdb00: 123
+0x7fffffffdb00: 1
