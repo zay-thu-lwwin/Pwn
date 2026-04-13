@@ -111,3 +111,36 @@ Big Endian  (Network, ARM some modes)
 int က 4bytes ဆိုတော့ 0x00 00 00 7B
 Little Endian ဆိုတော့ 
 memory မှာ 0x7B 0x00 0x00 0x00
+
+---
+
+
+| Key Combination | ASCII Code | Character Name            | Terminal Action          |
+| --------------- | ---------- | ------------------------- | ------------------------ |
+| **Ctrl + @**    | `0x00`     | NUL (Null)                | ဘာမှမလုပ်ဘူး             |
+| **Ctrl + A**    | `0x01`     | SOH (Start of Heading)    | Cursor to line start     |
+| **Ctrl + B**    | `0x02`     | STX (Start of Text)       | Cursor left              |
+| **Ctrl + C**    | `0x03`     | ETX (End of Text)         | **SIGINT (Interrupt)**   |
+| **Ctrl + D**    | `0x04`     | EOT (End of Transmission) | **EOF / Exit**           |
+| **Ctrl + E**    | `0x05`     | ENQ (Enquiry)             | Cursor to line end       |
+| **Ctrl + F**    | `0x06`     | ACK (Acknowledge)         | Cursor right             |
+| **Ctrl + G**    | `0x07`     | BEL (Bell)                | Beep sound               |
+| **Ctrl + H**    | `0x08`     | BS (Backspace)            | Delete previous char     |
+| **Ctrl + I**    | `0x09`     | HT (Horizontal Tab)       | Tab                      |
+| **Ctrl + J**    | `0x0A`     | LF (Line Feed)            | Newline (Enter)          |
+| **Ctrl + K**    | `0x0B`     | VT (Vertical Tab)         | Kill line from cursor    |
+| **Ctrl + L**    | `0x0C`     | FF (Form Feed)            | Clear screen             |
+| **Ctrl + M**    | `0x0D`     | CR (Carriage Return)      | Enter                    |
+| **Ctrl + N**    | `0x0E`     | SO (Shift Out)            | Next line in history     |
+| **Ctrl + O**    | `0x0F`     | SI (Shift In)             |                          |
+| **Ctrl + P**    | `0x10`     | DLE (Data Link Escape)    | Previous line in history |
+| **Ctrl + Q**    | `0x11`     | DC1 (Device Control 1)    | **XON (Resume output)**  |
+| **Ctrl + R**    | `0x12`     | DC2 (Device Control 2)    | Reverse search           |
+| **Ctrl + S**    | `0x13`     | DC3 (Device Control 3)    | **XOFF (Pause output)**  |
+| **Ctrl + T**    | `0x14`     | DC4 (Device Control 4)    | Transpose chars          |
+| **Ctrl + U**    | `0x15`     | NAK (Negative Ack)        | Kill line before cursor  |
+| **Ctrl + V**    | `0x16`     | SYN (Synchronous Idle)    | **Literal next char**    |
+| **Ctrl + W**    | `0x17`     | ETB (End Trans. Block)    | Delete previous word     |
+| **Ctrl + X**    | `0x18`     | CAN (Cancel)              | Various commands         |
+| **Ctrl + Y**    | `0x19`     | EM (End of Medium)        | Yank killed text         |
+| **Ctrl + Z**    | `0x1A`     | SUB (Substitute)          | **SIGTSTP (Suspend)**    |
