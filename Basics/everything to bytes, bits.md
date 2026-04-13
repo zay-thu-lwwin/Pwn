@@ -145,7 +145,14 @@ memory မှာ 0x7B 0x00 0x00 0x00
 | **Ctrl + X**    | `0x18`     | CAN (Cancel)              | Various commands         |
 | **Ctrl + Y**    | `0x19`     | EM (End of Medium)        | Yank killed text         |
 | **Ctrl + Z**    | `0x1A`     | SUB (Substitute)          | **SIGTSTP (Suspend)**    |
+Terminal က control characters တွေကို သူ့ရဲ့ function အဖြစ် သုံးတယ်၊ input အဖြစ် မပို့ဘူး
 
 
 
-Terminal က control characters တွေကို သူ့ရဲ့ function အဖြစ် သုံးတယ်၊ input အဖြစ် မပို့ဘူး!**
+**Raw Mode**
+**ISIG (Interrupt Signal) flag**
+
+
+
+
+
