@@ -94,7 +94,7 @@ Malloc ကဘယ်လိုနေရာယူလဲဆိုရင်
 	ပါဝင်တယ် 
 	program စတာနဲ့စပြီး create လုပ်တဲ့ heap ကို main arena လို့ခေါ်တယ် Single-threaded program တွေအတွက် ဒီကောင်အဆင်ပြေတယ် sbrk()/brk() သုံးပြီး heap တိုးတယ်
 	Thread အသစ်တစ်ခုစီအတွက် ဖန်တီးထားတာကို Thread Arena (Non-main Arena)/Secondary Arena လို့ခေါ်တယ် mmap()သုံးပြီး anonymous mapping လုပ်တယ် Heap memory တွေက မဆက်စပ်တဲ့နေရာမှာရှိတယ် ဒီကောင် ထဲက heap ကို sub heap လို့ခေါ်တယ် Thread အသစ်တစ်ခုစီအတွက် new arena ဖန်တီးနိုင်တယ် (large allcoation တွေအတွက် main arena ကလည်း mmap() သုံးပြီးနေရာယူပါတယ် ဒါမဲ့ sbrk()/brk() လို တစ်ဆက်တည်း မဟုတ်တော့ပါဘူး)
-	ဒီနေရာမှာ secondary arena က heap နဲ့ တစ်ဆက်တည်းမဟုတ်ပါဘူး shared library region လိုနေရာမှာ memory အသစ် တစ်ခု create လုပ်သလိုဖြစ်ပါတယ် memory ပေါ်မှာ ကွက်ကြားကွက်ကြားရှိတဲ့       သဘောမျိူးပါဘဲ
+	ဒီနေရာမှာ secondary arena က heap နဲ့ တစ်ဆက်တည်းမဟုတ်ပါဘူး shared library region လိုနေရာမှာ memory အသစ် တစ်ခု create လုပ်သလိုဖြစ်ပါတယ် memory ပေါ်မှာ ကွက်ကြားကွက်ကြားရှိတဲ့ သဘောမျိူးပါဘဲ
 
 
 ![](./pictures/heap-arenas-CS.png)
