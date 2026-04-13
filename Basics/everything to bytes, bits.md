@@ -241,3 +241,73 @@ stty isig
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+အဆင့် 1: TTY Basics (ခင်ဗျားသိပြီးသား)
+├── TTY ဆိုတာဘာလဲ
+├── Canonical vs Raw Mode
+├── stty commands
+└── Line discipline
+
+အဆင့် 2: Terminal Emulators
+├── PTY (Pseudo Terminal) အလုပ်လုပ်ပုံ
+├── Terminal types (xterm, vt100, vt520, etc.)
+├── Terminfo database
+└── TERM environment variable
+
+အဆင့် 3: Character Encoding
+├── ASCII
+├── UTF-8 (မြန်မာ၊ တရုတ်၊ ဂျပန်)
+├── Wide characters (wchar_t)
+└── Unicode normalization
+
+အဆင့် 4: Input Processing Chain
+├── Kernel → TTY Driver → Line Discipline
+├── Signal handling (SIGINT, SIGTSTP, SIGQUIT)
+├── Job control (foreground/background)
+└── Process groups and sessions
+
+အဆင့် 5: Advanced Terminal Features
+├── Escape sequences (ANSI, CSI)
+├── Colors and formatting
+├── Mouse input in terminal
+├── Bracketed paste
+└── Alternate screen buffer
+
+အဆင့် 6: Programming Terminal Apps
+├── termios.h (full API)
+├── ncurses library
+├── readline library
+├── termcap/terminfo
+└── Building TUI applications
+
+အဆင့် 7: Remote Terminals
+├── SSH PTY forwarding
+├── Telnet (legacy)
+├── Serial terminals (RS-232)
+└── Network virtual terminals
+
+အဆင့် 8: Security Aspects
+├── Input injection attacks
+├── Escape sequence vulnerabilities
+├── Terminal hijacking
+├── Shellshock and related
+└── TTY sandboxing
+```
