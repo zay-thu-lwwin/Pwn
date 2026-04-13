@@ -212,3 +212,9 @@ stty isig
 
 #### TTY System (TeleTYpewriter) 
 Linux မှာ terminal input/output ကို စီမံခန့်ခွဲတဲ့ subsystem
+`Hello<backspace>` လို့ရိုက်လိုက်ရင် terminal မှာ `Hello\x0f` လို့ဝင်သွားတယ်
+အဲ့အခါ **\x0f** ကြောင့် ရှေ့တစ်လုံးကို tty က ဖြတ်ပေးသွား
+`Hell`
+ပြီးမှ program ကို ပို့ပေး
+ဘယ်လို bypass မလဲဆို `\x16` _(escape character)_ သုံး
+`\x16` နောက်မှာပါတဲ့ byte က Control character အနေနဲ့ အလုပ် မလုပ်တော့
