@@ -29,5 +29,13 @@
 ASCII က 'A' = 0x41
 UTF-8 က 'A' = 0x41 (အတူတူပဲ)
 ASCII file တိုင်းက UTF-8 file လည်းဖြစ်တယ်
+UTF-8 က စာလုံးတစ်လုံးကို 1 byte ကနေ 4 bytes နဲ့ ကိုယ်စားပြု
+
+| Bytes       | Pattern                               | what for                 | example                      |
+| ----------- | ------------------------------------- | ------------------------ | ---------------------------- |
+| **1 byte**  | `0xxxxxxx`                            | ASCII (U+0000 to U+007F) | 'A' → `01000001`             |
+| **2 bytes** | `110xxxxx 10xxxxxx`                   | U+0080 to U+07FF         | 'ع' (Arabic)                 |
+| **3 bytes** | `1110xxxx 10xxxxxx 10xxxxxx`          | U+0800 to U+FFFF         | 'မ' (Burmese), '中' (Chinese) |
+| **4 bytes** | `11110xxx 10xxxxxx 10xxxxxx 10xxxxxx` | U+10000 to U+10FFFF      | '😀' (Emoji)                 |
 
 ![](./pictures/ASCII.GIF)
