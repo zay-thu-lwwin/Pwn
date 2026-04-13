@@ -114,6 +114,7 @@ memory မှာ 0x7B 0x00 0x00 0x00
 
 ---
 
+## Control Characters (ASCII 0-31)
 
 | Key Combination | ASCII Code | Character Name            | Terminal Action          |
 | --------------- | ---------- | ------------------------- | ------------------------ |
