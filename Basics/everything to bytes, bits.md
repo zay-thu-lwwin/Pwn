@@ -155,6 +155,19 @@ Terminal က ရိုက်လိုက်တဲ့ ဘာမဆိုကို
 #### Cooked Mode(ပုံမှန်) 
 Terminal က special keys တွေကို ကြိုစစ်ပြီး သူ့ဘာသာ အဓိပ္ပာယ်ဖွင့်တယ်
 
+
+|Feature|Cooked Mode (ပုံမှန်)|Raw Mode|
+|---|---|---|
+|**Ctrl+C**|SIGINT signal ပို့တယ်|`0x03` byte အဖြစ်ရောက်တယ်|
+|**Ctrl+Z**|SIGTSTP signal ပို့တယ်|`0x1A` byte အဖြစ်ရောက်တယ်|
+|**Backspace**|Character ကိုဖျက်တယ်|`0x7F` byte အဖြစ်ရောက်တယ်|
+|**Enter**|`\n` (0x0A) ပို့တယ်|`\r` (0x0D) ပို့တယ်|
+|**Line editing**|ရှိတယ် (backspace, arrows)|မရှိဘူး (program ကိုယ်တိုင်လုပ်ရတယ်)|
+|**Echo**|သင်ရိုက်တာ screen ပေါ်ပြတယ်|မပြဘူး (program ကိုယ်တိုင်ပြရတယ်)|
+
+
+
+
 **ISIG (Interrupt Signal) flag**
 
 
