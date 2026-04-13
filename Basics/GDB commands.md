@@ -41,6 +41,10 @@ py exec("import gdb; gdb.execute('ni'); gdb.execute('telescope 20'); gdb.execute
 command
 define hook-stop
 
+
+
+
+
 python -c "import sys; sys.stdout.buffer.write(b'\x13\xc4\x61\x56\xea\x56 %p %p %p %p %p %p')" | ./valley
 
 ```
@@ -55,3 +59,32 @@ python -c "import sys; sys.stdout.buffer.write(b'\x13\xc4\x61\x56\xea\x56 %p %p 
 (gdb) nexti                   # Step over function calls
 (gdb) print $rsp              # Print RSP value
 (gdb) print (void*)buffer     # Print buffer address
+ p num (print num variable)
+
+
+# Variable declaration
+int num = 123;
+
+# View as different types
+pwndbg> p num
+$1 = 123
+
+# View as hex (4 bytes, little endian)
+pwndbg> x/4bx &num
+0x7fffffffdb00: 0x7b 0x00 0x00 0x00
+
+# View as 1 byte (LSB)
+pwndbg> x/1bx &num
+0x7fffffffdb00: 0x7b
+
+# View as 2 bytes (short)
+pwndbg> x/2hx &num
+0x7fffffffdb00: 0x007b
+
+# View as 4 bytes (int)
+pwndbg> x/4wx &num
+0x7fffffffdb00: 0x0000007b
+
+# View as decimal
+pwndbg> x/1dw &num
+0x7fffffffdb00: 123
