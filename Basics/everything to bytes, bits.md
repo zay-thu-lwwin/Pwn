@@ -90,3 +90,4 @@ Unsigned char:
 
 
 #### Endianness
+**Endianness** က memory ထဲမှာ bytes တွေကို ဘယ်လိုအစီအစဉ်နဲ့ သိမ်းသလဲ ဆိုတာ ဖော်ပြ
