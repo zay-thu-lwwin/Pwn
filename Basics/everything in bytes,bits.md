@@ -39,3 +39,9 @@ UTF-8 က စာလုံးတစ်လုံးကို 1 byte ကနေ 4 by
 | **4 bytes** | `11110xxx 10xxxxxx 10xxxxxx 10xxxxxx` | U+10000 to U+10FFFF      | '😀' (Emoji)                 |
 
 ![](./pictures/ASCII.GIF)
+
+
+
+ဆိုတော့ ဆက်ပြောရရင်
+ငါတို့က  input ကို ဘာဘဲရိုက်ရိုက် ASCII or UTF-8 အနေနဲ့ဝင်သွားတယ်
+ပြီးမှ program က လိုအပ်သလို data type ပြောင်းလဲသတ်မှတ်တယ်
