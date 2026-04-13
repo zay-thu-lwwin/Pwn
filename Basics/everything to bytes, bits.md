@@ -210,5 +210,5 @@ stty isig
 ```
 
 
-#### TTY System
-
+#### TTY System (TeleTYpewriter) 
+Linux မှာ terminal input/output ကို စီမံခန့်ခွဲတဲ့ subsystem
