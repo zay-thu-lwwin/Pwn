@@ -1,6 +1,6 @@
 
 1 byte = 8bit
-32 bit system = 4 byte
+32 bit system = 4 byte 
 64 bit system = 8 byte
 
 
@@ -25,5 +25,9 @@
 #### input
 ငါတို့ keyboard ကနေ စာရိုက်တယ်
 ရီုက်တဲ့ကောင်တွေက ဘာရိုက်ရိုက် ASCII ဘဲ
+အခြားဘာသာစကားတွေကို တစ်ညီတစ်ညွတ်တည်းသုံးဖို့  UTF-8 (Unicode Transformation Format - 8 bit) ကိုသုံးတယ်
+ASCII က 'A' = 0x41
+UTF-8 က 'A' = 0x41 (အတူတူပဲ)
+ASCII file တိုင်းက UTF-8 file လည်းဖြစ်တယ်
 
 ![](./pictures/ASCII.GIF)
