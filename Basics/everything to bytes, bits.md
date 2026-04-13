@@ -99,3 +99,11 @@ Little Endian
 မှာဆိုရင် LSB က စသိမ်း
 Big Endian 
 မှာဆိုရင် MSB က စသိမ်း
+
+| Byte Position (Address)     | Value | Little Endian  | Big Endian     |
+| --------------------------- | ----- | -------------- | -------------- |
+| Byte 0 (အနိမ့်ဆုံး address) | 0x12  | **0x78** (LSB) | **0x12** (MSB) |
+| Byte 1                      | 0x34  | **0x56**       | **0x34**       |
+| Byte 2                      | 0x56  | **0x34**       | **0x56**       |
+| Byte 3 (အမြင့်ဆုံး address) | 0x78  | **0x12** (MSB) | **0x78** (LSB) |
+
