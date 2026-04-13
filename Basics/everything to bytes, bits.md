@@ -108,4 +108,6 @@ Big Endian
 | Byte 3 (အမြင့်ဆုံး address) | 0x78  | **0x12** (MSB) | **0x78** (LSB) |
 
 ဆိုတော့ int 0x7B ကိုသိမ်းချင်တယ်
-int က 4bytes ဆိုတော့ 0x00
+int က 4bytes ဆိုတော့ 0x00 00 00 7B
+Little Endian ဆိုတော့ 
+memory မှာ 0x7B 0x00 0x00 0x00
