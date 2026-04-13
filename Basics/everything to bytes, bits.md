@@ -114,6 +114,10 @@ memory မှာ 0x7B 0x00 0x00 0x00
 
 ---
 
+1. သင်က keyboard နဲ့ စာရိုက်တယ်
+2. အဲဒီစာက program ဆီ ရောက်ဖို့ လမ်းတစ်လျှောက် အဆင့်တွေ ဖြတ်သွားတယ်
+3. အဲဒီအဆင့်တွေမှာ စာကို ပြောင်းလဲနိုင်တယ် (filter လုပ်နိုင်တယ်)
+
 ## Control Characters (ASCII 0-31)
 
 | Key Combination | ASCII Code | Character Name            | Terminal Action          |
