@@ -1,7 +1,7 @@
 
 1 byte = 8bit
-32 bit system = 4 byte 
-64 bit system = 8 byte
+32 bit system = 4 byte  (CPU က တစ်ကြိမ်မှာ 4 byte ကို process လုပ်နိုင်)
+64 bit system = 8 byte  (CPU က တစ်ကြိမ်မှာ 8 byte ကို process လုပ်နိုင်)
 
 
 
