@@ -24,3 +24,6 @@
 
 #### input
 ငါတို့ keyboard ကနေ စာရိုက်တယ်
+ရီုက်တဲ့ကောင်တွေက 
+
+![](./pictures/ASCII.GIF)
