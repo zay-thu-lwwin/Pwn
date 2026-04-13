@@ -95,9 +95,9 @@ Unsigned char:
 0x12 က MSB (Most Significant Byte)
 0x78 က LSB (Least Significant Byte)
 
-Little Endian 
+Little Endian (x86, x86-64)
 မှာဆိုရင် LSB က စသိမ်း
-Big Endian 
+Big Endian  (Network, ARM some modes)
 မှာဆိုရင် MSB က စသိမ်း
 
 | Byte Position (Address)     | Value | Little Endian  | Big Endian     |
