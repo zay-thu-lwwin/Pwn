@@ -113,6 +113,46 @@ int က 4bytes ဆိုတော့ 0x00 00 00 7B
 Little Endian ဆိုတော့ 
 memory မှာ 0x7B 0x00 0x00 0x00
 
+#### byte-by-byte
+
+ဆိုတော့ နောက်ထပ် တကယ် stack မှာ addressတွေ ကို ဘယ်လိုသိမ်းလဲ
+```stack
+0d:0068│-008     0x7fffffffdb68 ◂— 0xaca2f1b1956a3100
+0e:0070│ rbp     0x7fffffffdb70 —▸ 0x7fffffffdb80 ◂— 1
+0f:0078│+008     0x7fffffffdb78 —▸ 0x555555555413 (main+18) ◂— mov eax, 0
+10:0080│+010     0x7fffffffdb80 ◂— 1
+11:0088│+018     0x7fffffffdb88 —▸ 0x7ffff7c29f68 (__libc_start_call_main+120) ◂— mov edi, eax
+12:0090│+020     0x7fffffffdb90 ◂— 0
+
+```
+
+ဒီမှာ  0x7fffffffdb78 မှာ 0x555555555413 ကိုသိမ်းထားတယ်ဆိုပါဆို့ 
+တကယ်တမ်းက 0x7fffffffdb78 ကနေ 0x7fffffffdb80 အထိ 8 byte စာအတွက် ယူတယ်
+အစောကပြောတဲ့အတိုင်း little endian နဲ့သိမ်မယ်
+break down လုပ်မယ်
+
+```
+Value: 0x555555555413 (8 bytes)
+
+Byte breakdown:
+0x55 0x55 0x55 0x55 0x55 0x41 0x30
+```
+
+ပြီးရင် little endian အတိုင်းသိမ်းမယ်
+ဆိုတော့ဒီအတိုင်းဘဲဖြစ်မယ်
+
+| Address        | Byte Value   |
+| -------------- | ------------ |
+| 0x7fffffffdb78 | `0x13` (LSB) |
+| 0x7fffffffdb79 | `0x54`       |
+| 0x7fffffffdb7a | `0x55`       |
+| 0x7fffffffdb7b | `0x55`       |
+| 0x7fffffffdb7c | `0x55`       |
+| 0x7fffffffdb7d | `0x55`       |
+| 0x7fffffffdb7e | `0x55`       |
+| 0x7fffffffdb7f | `0x55`       |
+
+
 ---
 
 1.  keyboard နဲ့ စာရိုက်တယ်
@@ -241,11 +281,7 @@ stty isig
 ```
 
 
-
-
-
-
-
+---
 
 
 
