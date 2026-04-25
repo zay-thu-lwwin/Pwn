@@ -37,9 +37,9 @@ mov    QWORD PTR [rbp-0x8], rax  # stack ပေါ်တင်
 Function စခေါ်တဲ့အခါ မှာ saved `ebp` ပြီးရင် canary value ကိုထည့်ထားတယ်
 Function ပြီးသွားရင် canary value ပျက်သွားလားစစ်
 Value ပြောင်းသွားရင် program က crash ဖြစ် (Stack Smashing Detected!)
-canary value က program run time တစ်ခုမှာ function တိုင်းအတွက်တူတယ်
+canary value က program run time တစ်ခုမှာ ` function တိုင်းအတွက်တူတယ်`
 
-## Bypass 
+### Bypass 
 
 	Canary value ကို leak လုပ်နိုင်ရင် 
 	stack canary protection ကို bypass လုပ်လို့ရ
