@@ -32,6 +32,7 @@ x/10x
 # printf in section .text of /lib/i386-linux-gnu/libc.so.6
 telescope 20 (tel 20)
 vmmap libc
+info proc all
 info proc mappings
 
 x/[COUNT][FORMAT][SIZE]
