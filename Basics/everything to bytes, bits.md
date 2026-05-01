@@ -9,24 +9,22 @@ x64 system
 (CPU က တစ်ကြိမ်မှာ 8 byte ကို process လုပ်နိုင်)
 
 
-
-|Type|Size (bytes)|Example Value|Stack Alignment|
-|---|---|---|---|
-|`char`|1|`'A'` (0x41)|1-byte|
-|`unsigned char`|1|`255` (0xFF)|1-byte|
-|`bool`|1|`1` (0x01)|1-byte|
-|`short`|2|`0x1234`|2-byte|
-|`unsigned short`|2|`0xFFFF`|2-byte|
-|`int`|4|`0x12345678`|4-byte|
-|`unsigned int`|4|`0xFFFFFFFF`|4-byte|
-|`float`|4|`3.14` (0x4048F5C3)|4-byte|
-|`long`|8|`0x123456789ABCDEF0`|8-byte|
-|`unsigned long`|8|`0xFFFFFFFFFFFFFFFF`|8-byte|
-|`long long`|8|`0x123456789ABCDEF0`|8-byte|
-|`double`|8|`3.14159`|8-byte|
-|`void*` (pointer)|8|`0x7fffffffdb00`|8-byte|
-|`size_t`|8|`0x64` (100)|8-byte|
-
+| Type              | 32-bit Size (bytes) | 64-bit Size (bytes) | Example Value                                         | Stack Alignment |
+| ----------------- | ------------------- | ------------------- | ----------------------------------------------------- | --------------- |
+| `char`            | 1                   | 1                   | `'A'` (0x41)                                          | 1-byte          |
+| `unsigned char`   | 1                   | 1                   | `255` (0xFF)                                          | 1-byte          |
+| `bool`            | 1                   | 1                   | `1` (0x01)                                            | 1-byte          |
+| `short`           | 2                   | 2                   | `0x1234`                                              | 2-byte          |
+| `unsigned short`  | 2                   | 2                   | `0xFFFF`                                              | 2-byte          |
+| `int`             | 4                   | 4                   | `0x12345678`                                          | 4-byte          |
+| `unsigned int`    | 4                   | 4                   | `0xFFFFFFFF`                                          | 4-byte          |
+| `float`           | 4                   | 4                   | `3.14` (0x4048F5C3)                                   | 4-byte          |
+| `long`            | **4**               | **8**               | `0x12345678` (32-bit) / `0x123456789ABCDEF0` (64-bit) | 4/8-byte        |
+| `unsigned long`   | **4**               | **8**               | `0xFFFFFFFF` (32-bit) / `0xFFFFFFFFFFFFFFFF` (64-bit) | 4/8-byte        |
+| `long long`       | 8                   | 8                   | `0x123456789ABCDEF0`                                  | 8-byte          |
+| `double`          | 8                   | 8                   | `3.14159`                                             | 8-byte          |
+| `void*` (pointer) | **4**               | **8**               | `0x7fffffff` (32-bit) / `0x7fffffffdb00` (64-bit)     | 4/8-byte        |
+| `size_t`          | **4**               | **8**               | `0x64` (100)                                          | 4/8-byte        |
 #### input
 
 ငါတို့ keyboard ကနေ စာရိုက်တယ်
