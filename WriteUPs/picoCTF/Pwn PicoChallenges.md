@@ -245,9 +245,11 @@ picoCTF{Power_t0_man!pul4t3_3nv_3f693329}ctf-player@pico-chall$ Connection to sa
 explain this, └─$ file vuln vuln: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, for GNU/Linux 3.2.0, BuildID[sha1]=670139b05b438fbd512de3e3a3bf2715f295cbbc, not stripped
 ```
 
-	 ဒီမှာက  statically linked ဖြစ်နေတယ် ဆိုလိုတာက program ထဲမှာ လိုအပ်တဲ့ libraries တွေအားလုံးကို program ထဲမှာပဲထည့်သွင်းထားတာပါ။ Dynamic linking မဟုတ်တဲ့အတွက် အခြား system libraries တွေမလိုအပ်ဘူး။ ဆိုတော့  static ဖြစ်လို ROP gadget တွေရှာရလွယ်မယ် no stripped ဖြစ်လို့ function name တွေမြင်ရမယ်
+	 ဒီမှာက  statically linked ဖြစ်နေတယ် ဆိုလိုတာက program ထဲမှာ လိုအပ်တဲ့ libraries တွေအားလုံးကို program ထဲမှာပဲထည့်သွင်းထားတာပါ။ Dynamic linking မဟုတ်တဲ့အတွက် အခြား system libraries တွေမလိုအပ်ဘူး။ 
+	 ဆိုတော့  static ဖြစ်လို ROP gadget တွေရှာရလွယ်မယ် 
+	 no stripped ဖြစ်လို့ function name တွေမြင်ရမယ်
 
-	ဒီမှာ vuln တစ်ခုတွေ့တယ် random တောင်းပြီး user input နဲ့စစ်တယ် ဒါမဲ့ random functionက ဘာလုပ်လဲဆို တစ်ခါလာတိုင်း random လုပ်မယ့် noတွေကတူနေမယ် list တစ်ကို random funciton ခေါ်တိုင်း index အလိုက် output ထုတ်သလိုမျိူး ဆိုတော့ ငါတို့ ခန့်မှန်းလို့ရတယ်  random function ကို seed ပေးလိုက်ရင်တော့ ငါတို့ခန့်မှန်းလို့မရတော့ဘူး seed ဆိုတာက အချိန်အလိုက်ပြောင်းလဲပေးတာကို ပြောတာဖြစ်တယ်
+	ဒီမှာ vuln တစ်ခုတွေ့တယ် random တောင်းပြီး user input နဲ့စစ်တယ် ဒါမဲ့ random functionက ဘာလုပ်လဲဆို တစ်ခါလာတိုင်း random လုပ်မယ့် no တွေကတူနေမယ် list တစ်ကို random funciton ခေါ်တိုင်း index အလိုက် output ထုတ်သလိုမျိူး ဆိုတော့ ငါတို့ ခန့်မှန်းလို့ရတယ်  random function ကို seed ပေးလိုက်ရင်တော့ ငါတို့ခန့်မှန်းလို့မရတော့ဘူး seed ဆိုတာက အချိန်အလိုက်ပြောင်းလဲပေးတာကို ပြောတာဖြစ်တယ်
 
 ``` c
 //seedဘယ်လိုသုံးတာလဲဆိုတာ ဥပမာ
@@ -288,6 +290,8 @@ void win(void)
 ---
 
 ## Guessing Game 2
+
+
 
 
  

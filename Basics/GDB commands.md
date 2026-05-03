@@ -1,5 +1,66 @@
 
 ```
+x/[COUNT][FORMAT][SIZE] address
+များသောအားဖြင် size က formatထက်အရင်လာ
+
+ Format Letters (display format)
+
+- x - hexadecimal   
+- d - decimal  
+- u - unsigned decimal  
+- o - octal  
+- t - binary  
+- c - character   
+- s - string  
+- i - instructions 
+  
+ Size Letters
+
+- b - byte (1 byte) 
+- h - halfword (2 bytes) 
+- w - word (4 bytes) 
+- g - giant (8 bytes)
+  
+```
+
+##### How count works
+
+Count က ဘယ်နှစ်ကြိမ် (ယူနစ်ဘယ်နှစ်ခု) ပြမလဲ ဆိုတာကို ဆုံးဖြတ်
+
+##### 64-bit (g size = 8 bytes)
+```
+# count = 2 (2 ခုပြမယ်)
+(gdb) x/2gx 0x1000
+0x1000: 0x0807060504030201  0x100f0e0d0c0b0a09
+        ^^^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^^^
+        (1st 8 bytes)       (2nd 8 bytes)
+
+# count = 3 (3 ခုပြမယ်)
+(gdb) x/3gx 0x1000
+0x1000: 0x0807060504030201  0x100f0e0d0c0b0a09  0x????????????????
+        (1st)               (2nd)               (3rd - နောက် 8 bytes)
+```
+
+
+##### 32-bit (w size = 4 bytes)
+```
+# count = 4 (4 ခုပြမယ် - တစ်ခုက 4 bytes)
+(gdb) x/4wx 0x1000
+0x1000: 0x04030201  0x08070605  0x0c0b0a09  0x100f0e0d
+
+# count = 2 (2 ခုပြမယ်)
+(gdb) x/2wx 0x1000
+0x1000: 0x04030201  0x08070605
+```
+
+##### Total Bytes = count × size
+
+- `x/10gx` → 10 × 8 = 80 bytes ပြမယ်
+- `x/20bx` → 20 × 1 = 20 bytes ပြမယ်
+- `x/5wx` → 5 × 4 = 20 bytes ပြမယ်
+
+
+```
 
 pwndbg> set disable-randomization off
 pwndbg> break main
@@ -35,15 +96,25 @@ vmmap libc
 info proc all
 info proc mappings
 
-x/[COUNT][FORMAT][SIZE]
+
 
 py exec("import gdb; gdb.execute('ni'); gdb.execute('telescope 20'); gdb.execute('x/30wx 0x804d1a0 - 16')")
 
 command
 define hook-stop
 
+python
+import gdb
+def show_stack(event):
+    gdb.execute("tel 50")
+gdb.events.stop.connect(show_stack)
 
 
+pwndbg> python gdb.events.stop.connect(lambda event: gdb.execute("tel 50"))
+
+
+set telescope-skip-repeating-val off
+echo "set telescope-skip-repeating-val off" >> ~/.gdbinit
 
 
 python -c "import sys; sys.stdout.buffer.write(b'\x13\xc4\x61\x56\xea\x56 %p %p %p %p %p %p')" | ./valley
