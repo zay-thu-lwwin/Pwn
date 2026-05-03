@@ -201,6 +201,24 @@ f4
 ptype user
 dq &user
 p user
+
+
+# Pwndbg heap commands
+heap               # Heap overview
+arena              # Arena information
+chunk $rax         # Inspect chunk at address
+bins               # Show all bins (fast, unsorted, small, large)
+fastbins           # Fastbins only
+unsortedbin        # Unsorted bin
+smallbin           # Small bins
+largebin           # Large bins
+tcachebins         # Tcache bins (glibc 2.26+)
+tracemalloc        # malloc hook tracing
+
+# Example heap debugging
+gdb-pwndbg$ heap
+gdb-pwndbg$ bins
+gdb-pwndbg$ chunk 0x555555559000
 ```
 
 
