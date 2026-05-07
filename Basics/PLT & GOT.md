@@ -301,6 +301,81 @@ pwndbg> vmmap 0x8049fdc
 
 
 
+##### No PIPE
+
+```
+# Local
+elf.got['printf'] = 0x8049fc8
+
+# Remote (same binary)
+elf.got['printf'] = 0x8049fc8  # ✅ တူတူဘဲ
+```
+
+
+##### With PIE
+
+```
+# Local
+elf.got['printf'] = 0x561234567010  (random base)
+
+# Remote  
+elf.got['printf'] = 0x7fabcdef0010  (different random base)
+```
+
+
+```
+End of assembler dump.
+pwndbg> disas 0x8048470
+Dump of assembler code for function printf@plt:
+   0x08048470 <+0>:     jmp    DWORD PTR ds:0x8049fc8
+   0x08048476 <+6>:     push   0x0
+   0x0804847b <+11>:    jmp    0x8048460
+End of assembler dump.
+pwndbg> x 0x8049fc8
+0x8049fc8 <printf@got.plt>:     0xf7d8a2d0
+pwndbg> 
+
+```
+
+
+|                | `elf.plt['printf']`                | `elf.got['printf']`                    |
+| -------------- | ---------------------------------- | -------------------------------------- |
+| ဘာလဲ           | PLT stub ရဲ့ လိပ်စာ                | GOT entry ရဲ့ လိပ်စာ                   |
+| တန်ဖိုး        | `0x8048470`                        | `0x8049fc8`                            |
+| အဲဒီမှာဘာရှိလဲ | `jmp [0x8049fc8]` (code)           | `0xf7d8a2d0` (real address data)       |
+| ဘာအတွက်သုံးလဲ  | Function ကို **ခေါ်ဖို့** (call)   | GOT ထဲက **value ကို leak** ဖို့        |
+| ဘယ်ကရလဲ        | ELF binary က code section (`.plt`) | ELF binary က data section (`.got.plt`) |
+| ပြောင်းလဲလား   | No (PIE မပါရင်)                    | No (PIE မပါရင်)                        |
+
+
+
+```
+Address: 0x8048470 (printf@PLT)  ← elf.plt['printf'] က ဒီကိုညွှန်း
+┌─────────────────────────────┐
+│ 0x8048470: jmp [0x8049fc8]  │
+│ 0x8048476: push 0x0         │
+│ 0x804847b: jmp 0x8048460    │
+└─────────────────────────────┘
+              │
+              │ (jump to address stored at 0x8049fc8)
+              ▼
+Address: 0x8049fc8 (printf@GOT) ← elf.got['printf'] က ဒီကိုညွှန်း
+┌─────────────────────────────┐
+│ 0x8049fc8: 0xf7d8a2d0       │ 
+└─────────────────────────────┘
+              │
+              │ (contains real address)
+              ▼
+Address: 0xf7d8a2d0 (real printf in libc)
+┌─────────────────────────────┐
+│ 0xf7d8a2d0: push ebp        │ ← ဒါက real printf function
+│ 0xf7d8a2d1: mov ebp, esp    │
+│ ...                         │
+└─────────────────────────────┘
+```
+
+
+
 
 ---
 
