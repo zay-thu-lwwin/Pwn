@@ -485,6 +485,7 @@ addr = elf.symbols['secret_function']
 
 
 #### Sending data and receving
+
 ```python
 # စာကြောင်းတစ်ခုလုံးဖတ်တာ
 io.recvline()     # စာတစ်ကြောင်းဖတ်မယ် (newline ပါမယ်) (newline တွေ့တာနဲ့ရပ်)
