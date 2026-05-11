@@ -89,6 +89,7 @@ Unsigned char:
 
 
 #### Endianness
+
 **Endianness** က memory ထဲမှာ bytes တွေကို ဘယ်လိုအစီအစဉ်နဲ့ သိမ်းသလဲ ဆိုတာ ဖော်ပြ
 4 bytes ရှိတဲ့ `0x12345678` မှာဆိုရင် 
 0x12 က MSB (Most Significant Byte)

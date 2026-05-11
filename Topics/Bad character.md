@@ -14,15 +14,15 @@
 
 ##### Commons
 
-|Function|Behavior|Bad Chars|
-|---|---|---|
-|`strcpy()`|Null byte (`\x00`) မှာ ရပ်|`\x00`|
-|`strncpy()`|Null byte ရောက်ရင် ရပ် (size ရှိပေမယ့်)|`\x00`|
-|`gets()`|Newline (`\n`) မှာ ရပ်|`\x0a`, `\x0d`|
-|`fgets()`|Newline ရောက်ရင် ရပ်|`\x0a` (if size allows)|
-|`scanf("%s")`|Whitespace မှာ ရပ်|`\x20`, `\x09`, `\x0a`, `\x0d`|
-|`read()`|သတ်မှတ် size ထိ ဖတ်|မရှိ (raw read)|
-|`memcpy()`|size အတိုင်း copy|မရှိ|
+| Function      | Behavior                                | Bad Chars                      |
+| ------------- | --------------------------------------- | ------------------------------ |
+| `strcpy()`    | Null byte (`\x00`) မှာ ရပ်              | `\x00`                         |
+| `strncpy()`   | Null byte ရောက်ရင် ရပ် (size ရှိပေမယ့်) | `\x00`                         |
+| `gets()`      | Newline (`\n`) မှာ ရပ်                  | `\x0a`, `\x0d`                 |
+| `fgets()`     | Newline ရောက်ရင် ရပ်                    | `\x0a` (if size allows)        |
+| `scanf("%s")` | Whitespace မှာ ရပ်                      | `\x20`, `\x09`, `\x0a`, `\x0d` |
+| `read()`      | သတ်မှတ် size ထိ ဖတ်                     | မရှိ (raw read)                |
+| `memcpy()`    | size အတိုင်း copy                       | မရှိ                           |
 
 ##### Other Root causes
 

