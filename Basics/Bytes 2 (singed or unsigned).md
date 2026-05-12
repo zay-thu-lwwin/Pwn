@@ -12,22 +12,48 @@ signed မှာ (+) value နဲ့ (-) value သိဖို့က
 အရင်ဆုံး ငါတို့ data type တွေက byte ဘယ်လောက်ယူတာလဲဆိုတာသိထားရမယ်
 အဲဒါမှ  bits width , bits အကျယ်ကိုသိမယ်
 
-| Type              | 32-bit Size (bytes) | 64-bit Size (bytes) | Example Value                                         | Stack Alignment |
-| ----------------- | ------------------- | ------------------- | ----------------------------------------------------- | --------------- |
-| `char`            | 1                   | 1                   | `'A'` (0x41)                                          | 1-byte          |
-| `unsigned char`   | 1                   | 1                   | `255` (0xFF)                                          | 1-byte          |
-| `bool`            | 1                   | 1                   | `1` (0x01)                                            | 1-byte          |
-| `short`           | 2                   | 2                   | `0x1234`                                              | 2-byte          |
-| `unsigned short`  | 2                   | 2                   | `0xFFFF`                                              | 2-byte          |
-| `int`             | 4                   | 4                   | `0x12345678`                                          | 4-byte          |
-| `unsigned int`    | 4                   | 4                   | `0xFFFFFFFF`                                          | 4-byte          |
-| `float`           | 4                   | 4                   | `3.14` (0x4048F5C3)                                   | 4-byte          |
-| `long`            | **4**               | **8**               | `0x12345678` (32-bit) / `0x123456789ABCDEF0` (64-bit) | 4/8-byte        |
-| `unsigned long`   | **4**               | **8**               | `0xFFFFFFFF` (32-bit) / `0xFFFFFFFFFFFFFFFF` (64-bit) | 4/8-byte        |
-| `long long`       | 8                   | 8                   | `0x123456789ABCDEF0`                                  | 8-byte          |
-| `double`          | 8                   | 8                   | `3.14159`                                             | 8-byte          |
-| `void*` (pointer) | **4**               | **8**               | `0x7fffffff` (32-bit) / `0x7fffffffdb00` (64-bit)     | 4/8-byte        |
-| `size_t`          | **4**               | **8**               | `0x64` (100)                                          | 4/8-byte        |
+
+
+| Type              | 32-bit Size | 64-bit Size | Min Limit      | Max Limit       | Example Value                                         |
+| ----------------- | ----------- | ----------- | -------------- | --------------- | ----------------------------------------------------- |
+| `char`            | 1           | 1           | -128           | +127            | `'A'` (65)                                            |
+| `unsigned char`   | 1           | 1           | 0              | 255             | `255` (0xFF)                                          |
+| `bool`            | 1           | 1           | 0              | 1               | `1` (true)                                            |
+| `short`           | 2           | 2           | -32,768        | +32,767         | `0x7FFF` (32,767)                                     |
+| `unsigned short`  | 2           | 2           | 0              | 65,535          | `0xFFFF` (65,535)                                     |
+| `int`             | 4           | 4           | -2,147,483,648 | +2,147,483,647  | `0x7FFFFFFF` (2,147,483,647)                          |
+| `unsigned int`    | 4           | 4           | 0              | 4,294,967,295   | `0xFFFFFFFF` (4,294,967,295)                          |
+| `float`           | 4           | 4           | ~1.18×10⁻³⁸    | ~3.4×10³⁸       | `3.14159`                                             |
+| `long`            | **4**       | **8**       | -2³¹ / -2⁶³    | +2³¹-1 / +2⁶³-1 | `0x7FFFFFFF` (32-bit) / `0x7FFFFFFFFFFFFFFF` (64-bit) |
+| `unsigned long`   | **4**       | **8**       | 0              | 4B / 1.8×10¹⁹   | `0xFFFFFFFF` (32-bit) / `0xFFFFFFFFFFFFFFFF` (64-bit) |
+| `long long`       | 8           | 8           | -9.22×10¹⁸     | +9.22×10¹⁸      | `0x7FFFFFFFFFFFFFFF`                                  |
+| `double`          | 8           | 8           | ~2.2×10⁻³⁰⁸    | ~1.8×10³⁰⁸      | `3.14159265358979`                                    |
+| `void*` (pointer) | **4**       | **8**       | 0              | 4GB / 16EB      | `0x7fffffff` (32-bit) / `0x7fffffffdb00` (64-bit)     |
+| `size_t`          | **4**       | **8**       | 0              | 4GB / 16EB      | `0x64` (100 bytes)                                    |
+
+| Type                     | Size (bytes) | **Alignment Required** | Example Value        | Notes            |
+| ------------------------ | ------------ | ---------------------- | -------------------- | ---------------- |
+| `char`                   | 1            | **1-byte**             | `'A'`                | anywhere         |
+| `unsigned char`          | 1            | **1-byte**             | `255`                | anywhere         |
+| `bool`                   | 1            | **1-byte**             | `1`                  | anywhere         |
+| `short`                  | 2            | **2-byte**             | `0x1234`             | address % 2 == 0 |
+| `unsigned short`         | 2            | **2-byte**             | `0xFFFF`             | address % 2 == 0 |
+| `int`                    | 4            | **4-byte**             | `0x12345678`         | address % 4 == 0 |
+| `unsigned int`           | 4            | **4-byte**             | `0xFFFFFFFF`         | address % 4 == 0 |
+| `float`                  | 4            | **4-byte**             | `3.14`               | address % 4 == 0 |
+| `long` (32-bit)          | 4            | **4-byte**             | `0x12345678`         | address % 4 == 0 |
+| `long` (64-bit)          | 8            | **8-byte**             | `0x123456789ABCDEF0` | address % 8 == 0 |
+| `unsigned long` (32-bit) | 4            | **4-byte**             | `0xFFFFFFFF`         | address % 4 == 0 |
+| `unsigned long` (64-bit) | 8            | **8-byte**             | `0xFFFFFFFFFFFFFFFF` | address % 8 == 0 |
+| `long long`              | 8            | **8-byte**             | `0x123456789ABCDEF0` | address % 8 == 0 |
+| `double`                 | 8            | **8-byte**             | `3.14159`            | address % 8 == 0 |
+| `void*` (pointer 32-bit) | 4            | **4-byte**             | `0x7fffffff`         | address % 4 == 0 |
+| `void*` (pointer 64-bit) | 8            | **8-byte**             | `0x7fffffffdb00`     | address % 8 == 0 |
+| `size_t` (32-bit)        | 4            | **4-byte**             | `0x64`               | address % 4 == 0 |
+| `size_t` (64-bit)        | 8            | **8-byte**             | `0x64`               | address % 8 == 0 |
+
+
+
 
 ဥပမာပြောရရင်
 ```
