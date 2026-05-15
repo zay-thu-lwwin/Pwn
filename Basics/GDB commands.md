@@ -114,6 +114,7 @@ backtrace (bt)             # Function call stack
 
 
 vmmap                # Memory mapping (check protections)
+piebase
 search "/bin/sh"     # Search string in memory
 search 0xdeadbeef    # Search value
 procinfo             # Process info (PID, path, etc.)
