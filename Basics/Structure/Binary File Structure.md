@@ -131,6 +131,19 @@ $ readelf -S ./vuln | grep -E "(\.got|\.plt|\.text|\.data|\.bss)"
   [24] .bss              NOBITS           00000000006bc4b0  000bc4b0  ← Writable (uninit)
 ```
 
+```
+# Compile and check sections
+$ gcc -o program program.c
+$ size program
+   text    data     bss     dec     hex filename
+   2048     512     256    2816     b00 program
+
+$ readelf -S program | grep -E "data|bss|text"
+  [14] .text             PROGBITS      00400000 000000 002000 00  AX  0   0 16
+  [15] .rodata           PROGBITS      00402000 002000 000200 00   A  0   0 8
+  [16] .data             PROGBITS      00403000 002200 000200 00  WA  0   0 8
+  [17] .bss              NOBITS        00403200 002400 000100 00  WA  0   0 8
+```
 
 
 	program headerက
@@ -293,9 +306,6 @@ objdump -T /lib/x86_64-linux-gnu/libc.so.6 | grep printf
 ```
 
 
-
-
-
 ----
 
 ##  `ldd`
@@ -309,12 +319,324 @@ ldd [options] <executable-or-library>
 ```
 
 ---
-
-
-
----
-
 ##  `Ropgadget`
 
+### **Install**
+```bash
+pip install ROPgadget
+# ဒါမှမဟုတ်
+sudo apt install ropgadget
+```
+
+### **Basic Usage**
+```bash
+# Binary တစ်ခုလုံးက gadgets အားလုံးရှာမယ်
+ROPgadget --binary ./r0bob1rd
+
+# Specific gadgets ရှာမယ် (pop rdi)
+ROPgadget --binary ./r0bob1rd | grep "pop rdi"
+
+# libc ထဲမှာရှာမယ်
+ROPgadget --binary ./glibc/libc.so.6 | grep "pop rdi"
+
+# သတ်မှတ်ထားတဲ့ gadgets ပဲကြည့်မယ်
+ROPgadget --binary ./r0bob1rd --only "pop|ret"
+
+# Output ကို file ထဲသိမ်းမယ်
+ROPgadget --binary ./r0bob1rd > gadgets.txt
+```
+
+
+```python
+from pwn import *
+
+# Binary load
+elf = context.binary = ELF('./r0bob1rd')
+libc = ELF('./glibc/libc.so.6')
+
+# ROP object ဆောက်မယ်
+rop = ROP(elf)
+
+# Specific gadget ရှာမယ်
+pop_rdi = rop.find_gadget(['pop rdi', 'ret'])[0]
+pop_rsi = rop.find_gadget(['pop rsi', 'ret'])[0]
+pop_rdx = rop.find_gadget(['pop rdx', 'ret'])[0]
+
+print(f"pop rdi; ret: {hex(pop_rdi)}")
+print(f"pop rsi; ret: {hex(pop_rsi)}")
+
+# ဒါမှမဟုတ် rop object ထဲက direct သုံးမယ်
+pop_rdi = rop.rdi.address  # pwntools 4.x+
+```
+
+
 ---
 
+#### With rp++
+### **Install**
+```bash
+git clone https://github.com/0vercl0k/rp.git
+cd rp
+make
+sudo make install
+```
+
+### **Usage**
+```bash
+# Binary ကနေ gadgets ရှာမယ်
+rp++ -f ./r0bob1rd -r 5
+
+# libc မှာရှာမယ်
+rp++ -f ./glibc/libc.so.6 -r 5
+
+# Output ကို json နဲ့ရမယ်
+rp++ -f ./r0bob1rd -r 5 --json > gadgets.json
+```
+
+---
+
+####  (Manual Way)
+
+```bash
+# Disassemble လုပ်ပြီး pattern ရှာမယ်
+objdump -d ./r0bob1rd | grep -A 1 "pop.*rdi" | grep ret
+
+# More detailed
+objdump -d ./r0bob1rd | awk '/pop/ && /ret/ {print $0}'
+
+# Raw bytes ကိုရှာမယ် (pop rdi = 0x5f, ret = 0xc3)
+objdump -d ./r0bob1rd | grep "5f c3"
+```
+
+---
+
+### `One-Gadget (to get shell directly)`
+
+```bash
+# one_gadget tool install
+gem install one_gadget
+# ဒါမှမဟုတ်
+sudo apt install ruby-one-gadget
+
+# libc ထဲက one-gadget တွေရှာမယ်
+one_gadget ./glibc/libc.so.6
+
+# Example output:
+# 0xe3afe execve("/bin/sh", r15, r12)
+# 0xe3b01 execve("/bin/sh", r15, rdx)
+# 0xe3b04 execve("/bin/sh", rsi, rdx)
+```
+
+```c
+└─$ one_gadget libc.so.6
+0xe3afe execve("/bin/sh", r15, r12)
+constraints:
+  [r15] == NULL || r15 == NULL || r15 is a valid argv
+  [r12] == NULL || r12 == NULL || r12 is a valid envp
+
+0xe3b01 execve("/bin/sh", r15, rdx)
+constraints:
+  [r15] == NULL || r15 == NULL || r15 is a valid argv
+  [rdx] == NULL || rdx == NULL || rdx is a valid envp
+
+0xe3b04 execve("/bin/sh", rsi, rdx)
+constraints:
+  [rsi] == NULL || rsi == NULL || rsi is a valid argv
+  [rdx] == NULL || rdx == NULL || rdx is a valid envp
+
+```
+
+##### In pwntools
+```python
+from pwn import *
+libc = ELF('./glibc/libc.so.6')
+
+# One gadget ရှာမယ် (one_gadget tool နဲ့ကြိုရှာထားရမယ်)
+one_gadgets = [0xe3afe, 0xe3b01, 0xe3b04]
+for og in one_gadgets:
+    print(f"One gadget: {hex(libc.address + og)}")
+```
+
+---
+
+
+| Gadget | Purpose | Bytes |
+|--------|---------|-------|
+| `pop rdi; ret` | First argument | `5f c3` |
+| `pop rsi; ret` | Second argument | `5e c3` |
+| `pop rdx; ret` | Third argument | `5a c3` |
+| `pop rax; ret` | Syscall number | `58 c3` |
+| `syscall; ret` | Execute syscall | `0f 05 c3` |
+| `leave; ret` | Stack pivot | `c9 c3` |
+| `ret` | Stack alignment | `c3` |
+
+---
+
+####  Advanced Tips
+
+### **Find gadgets in stripped binary**
+```bash
+# Stripped binary မှာလည်း gadgets ရှိတယ်
+ROPgadget --binary ./stripped_binary --depth 6 | head -20
+```
+
+### **Filter by specific registers**
+```bash
+# x86 (32-bit) gadgets
+ROPgadget --binary ./binary32 | grep "pop eax"
+
+# ARM gadgets
+ROPgadget --binary ./arm_binary --arch ARM | grep "pop {r0"
+```
+
+### **Save and reuse**
+```python
+# Save gadgets to file
+rop = ROP(elf)
+with open('rop_chain.txt', 'w') as f:
+    f.write(str(rop.dump()))
+
+# Load later
+import pickle
+with open('gadgets.pkl', 'wb') as f:
+    pickle.dump(rop.gadgets, f)
+```
+
+
+---
+
+
+#### Binary Gadget Vs `Libc` Gadget (ASLR On, PIE Disabled)
+
+```c
+# Binary gadgets → real address = offset (base fixed)
+pop_rdi_offset = 0x401234  # This IS the real address!
+pop_rdi_real = 0x401234    # No calculation needed
+
+# ✅ Can use directly
+payload = p64(0x401234)  # pop rdi; ret
+```
+
+```c
+# Libc offsets (from libc.so.6)
+pop_rdi_libc_offset = 0x2a3e5  # This is just offset!
+system_offset = 0x4f4e0
+bin_sh_offset = 0x1b75aa
+
+# Runtime: Need to leak libc base first
+libc_base = leaked_address - system_offset  # Calculate base
+pop_rdi_real = libc_base + pop_rdi_libc_offset  # Now real
+system_real = libc_base + system_offset
+```
+
+---
+
+#### Be careful of ROP
+
+##### 1. Register Conventions (Calling Convention)
+
+x86-64 (System V AMD64 ABI)
+```python
+# Function arguments order:
+# RDI, RSI, RDX, RCX, R8, R9
+
+# Example: system("/bin/sh")
+pop_rdi = 0x401234          # pop rdi; ret
+bin_sh = 0x7ffff7f7a123     # address of "/bin/sh"
+system = 0x7ffff7e3a1d0     # system() address
+
+rop_chain = p64(pop_rdi) + p64(bin_sh) + p64(system)
+# ဒါက call system("/bin/sh") နဲ့အတူတူပဲ
+```
+
+x86 (32-bit)
+```python
+# Arguments on stack (right to left)
+# system("/bin/sh") အတွက်:
+rop_chain = p32(system) + p32(0xdeadbeef) + p32(bin_sh)
+# return address after system() + argument
+```
+
+##### 2. Stack Alignment (Very Important!)
+
+```python
+# MOVAPS instruction in libc (especially system())
+# Requires 16-byte stack alignment
+
+# ❌ Wrong - May crash
+payload = p64(pop_rdi) + p64(bin_sh) + p64(system)
+
+# ✅ Correct - Add a ret gadget for alignment
+ret = 0x401016  # single ret instruction
+payload = p64(ret) + p64(pop_rdi) + p64(bin_sh) + p64(system)
+
+# Why? system() uses MOVAPS that needs rsp % 16 == 0
+```
+
+Check alignment in GDB
+```bash
+gdb ./binary
+b *system
+run
+# At breakpoint: info registers rsp
+# rsp should end with 0 (e.g., 0x7fffffffdea0)
+```
+
+##### 3. NULL Bytes Problem
+
+```python
+# ROP chain ထဲမှာ NULL bytes (\x00) ပါရင်:
+# - strcpy() က ဖြတ်ပစ်မယ်
+# - scanf() က terminate လုပ်မယ်
+# - read() က ရပါတယ် (binary read)
+
+# ❌ Bad - Contains NULL bytes
+payload = b'A'*64 + p64(0x0000000000401234)  # Has \x00 bytes
+
+# ✅ Good - No NULL bytes
+# Choose gadgets with addresses < 0x1000000
+# Or use write_size="short" in fmtstr_payload
+payload = fmtstr_payload(8, writes, write_size="short")
+```
+
+How to avoid NULL bytes
+```python
+# 1. Use small addresses (PIE disabled binaries)
+# 2. Use write primitives that allow partial writes
+# 3. Use encoders (for shellcode)
+
+# Example: Build address from parts
+high = 0x4012
+low = 0x34
+payload = p16(high) + p16(low)  # No NULL bytes
+
+
+```
+
+
+ ##### 4. Gadget Availability Checking
+
+```python
+from pwn import *
+
+elf = context.binary = ELF('./target')
+rop = ROP(elf)
+
+# Check if gadget exists before using
+def get_gadget(reg):
+    try:
+        if reg == 'rdi':
+            return rop.find_gadget(['pop rdi', 'ret'])[0]
+        elif reg == 'rsi':
+            return rop.find_gadget(['pop rsi', 'ret'])[0]
+    except:
+        print(f"[-] pop {reg}; ret not found!")
+        # Alternative: Use different registers or csu_init
+        return None
+
+# Alternative if pop rdi missing
+if not pop_rdi:
+    # Use call primitive through __libc_csu_init
+    csu_front = 0x400c00  # pop rbx, rbp, r12, r13, r14, r15; ret
+    csu_back = 0x400c20   # mov rdx, r13; mov rsi, r14; mov edi, r15d; call [r12+rbx*8]
+```

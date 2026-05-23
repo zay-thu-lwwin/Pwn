@@ -1,7 +1,9 @@
 
 
 	System Call (syscall) ဆိုတာ  User Program ကနေ Linux Kernel တိုက်ရိုက်ခိုင်းတဲ့
-	CPU instruction တစ်ခုဖြစ်ပါတယ် 
+	CPU instruction တစ်ခုဖြစ်ပါတယ်
+	user-space program က kernel-space ကို ဝင်ပြီး OS ရဲ့ ဝန်ဆောင်မှုတွေ (file open, process create, network send) ကို တောင်းဆိုတဲ့ နည်းလမ်း
+	syscall number တစ်ခုစီနဲ့ သက်ဆိုင်တဲ့ function ကို သတ်မှတ်ပေးထားတဲ့ ဇယားဖြစ်တယ် 
 	built in function သုံးတိုင်း ဒီကောင်ရှိတယ်
 	ဆိုတော့
 	dynamically linked မှာ syscall က libc ထဲမှာရှိနေမယ်
@@ -30,10 +32,14 @@
 
 #### `2. Arguments ပြင်ဆင်ရမယ်`
 
+
+
+
+
 	- System call ကိုပို့ချင်တဲ့ arguments တွေကို register တွေထဲထည့်ရပါတယ်
     32-bit Linux အတွက်
 ```
-
+	eax - syscall number ထည့်ရန်
     ebx - 1st argument
     ecx - 2nd argument  
     edx - 3rd argument
@@ -45,6 +51,7 @@
     
 	 64-bit Linux အတွက်
  ```
+	rax - syscall number ထည့်ရန်
     rdi - 1st argument
     rsi - 2nd argument
     rdx - 3rd argument  
@@ -68,6 +75,9 @@
 
 
 https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64/
+
+system call table for both 64bit and 32 bit:
+https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md
 
 ---
 ---

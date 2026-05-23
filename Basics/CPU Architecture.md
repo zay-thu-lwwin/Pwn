@@ -1,4 +1,17 @@
 
+
+### CPU ဆိုတာဘာလဲ (Central Processing Unit)
+
+CPU က ကွန်ပျူတာရဲ့ **ဦးနှောက်**။ ၎င်းက **machine code (binary)** ကိုဖတ်ပြီး အလုပ်လုပ်တယ်။
+
+CPU ရဲ့ အဓိက အစိတ်အပိုင်း (၃) ခု
+
+1. **ALU (Arithmetic Logic Unit)** - တွက်ချက်တယ် (ပေါင်း၊ နှုတ်၊ AND, OR)
+    
+2. **CU (Control Unit)** - instruction တွေကို ဖြန့်ဝေတယ်
+    
+3. **Registers** - သေးငယ်တဲ့ မြန်ဆန်တဲ့ memory (CPU ထဲမှာ)
+
 ## CPU Architecture 
 
 Von-Neumann ဗိသုကာကို Hungarian သင်္ချာပညာရှင် John von Neumann က တီထွင်ခဲ့တာပါ။ ၎င်းမှာ အဓိက အပိုင်း ၄ ပိုင်း ပါဝင်တယ်-

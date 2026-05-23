@@ -80,7 +80,7 @@ $ readelf -s /lib/x86_64-linux-gnu/libc.so.6 | grep " system"
 # system offset = 0x55410
 
 # Get offset of puts()
-$ readelf -s /lib/x86_64-linux-gnu/libc.so.6 | grep " p uts"
+$ readelf -s /lib/x86_64-linux-gnu/libc.so.6 | grep " puts"
   1316: 0000000000087aa0   512 FUNC    WEAK   DEFAULT   16 puts@@GLIBC_2.2.5
 # puts offset = 0x87aa0
 

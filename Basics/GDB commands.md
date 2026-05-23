@@ -101,6 +101,9 @@ restart   #restart program (pwndbg)
 
 p/x $rbp-0x70  # stack address ကိုကြည့်
 
+vmmap
+got
+plt
 info file          # Show program sections, entry point
 info functions     # List all functions
 info variables     # List all variables
