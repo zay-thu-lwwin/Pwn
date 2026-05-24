@@ -125,7 +125,13 @@ elfheader            # ELF section headers
 checksec             # Security mitigations
 aslr                 # Check/modify ASLR
 
-
+gdb ./my_program
+(gdb) break main
+(gdb) run
+(gdb) info registers        # register အားလုံးကိုပြ
+(gdb) info registers eflags # EFLAGS/RFLAGS ကိုပြ
+(gdb) p/x $eflags          # eflags တန်ဖိုးကိုပြ
+;
 si (go into function call)
 ni (skip function call)
 continue (c)
