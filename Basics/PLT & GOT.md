@@ -35,9 +35,9 @@ Lower Addresses
 ---
 
 
-#### PLT & GOT 
+### PLT & GOT 
 
-##### PLT (Procedure Linkage Table)
+#### PLT (Procedure Linkage Table)
 
 - Code section ထဲမှာရှိတဲ့  stub functions တွေဖြစ်တယ်
 - ပထမဆုံးခေါ်တဲ့အခါ GOT ကနေ real address ကိုသွားယူ
@@ -45,12 +45,124 @@ Lower Addresses
 - Example: `puts()` ဆိုတဲ့ function ကို call လိုက်ရင် တကယ်တမ်းက `puts@plt` ကိုခေါ်တာ
 
 
-##### GOT (Global Offset Table)
+#### GOT (Global Offset Table)
 - တကယ့် function addresses တွေသိမ်းထားတဲ့ address book
 - Memory ထဲက libc functions တွေရဲ့တကယ့်လိပ်စာတွေပါ
 -  Data section ထဲမှာရှိတဲ့ address table ဖြစ်တယ်
 - dynamic linker က real function address တွေကို ဖြည့်ပေးတယ်
 - Runtime မှာ address randomization (ASLR) ရှိရင် ကွဲပြားနိုင်တယ်
+
+
+
+##### GOT (Global Offset Table)  Structure
+
+GOT ကအပိုင်းနှစ်ပိုင်း ရှိတယ်
+
+ 1. GOT (non-PLT) - `.got` section
+- သိမ်းဆည်းတဲ့အကြောင်းအရာ: Global variables, static variables, constants
+- အသုံးပြုပုံ: Program က သူ့ရဲ့ **data** ကို ရှာဖွေဖို့
+
+
+ 2. GOT (PLT) - `.got.plt` section
+- သိမ်းဆည်းတဲ့အကြောင်းအရာ: **Function pointers** (puts, printf, etc.)
+- အသုံးပြုပုံ: Program က dynamic linker ကနေ function address တွေကို ရှာဖွေဖို့
+
+
+GOT (PLT) က PLT stub တွေနဲ့ တိုက်ရိုက် ချိတ်ဆက်ထားတယ် (jump table အတွက်)
+GOT (non-PLT) က သီးခြား data သိုလှောင်ရုံ။ PLT နဲ့ ဘာမှ မဆိုင်ဘူး
+
+```bash
+pwndbg> got -r
+
+# GOT (non-PLT) - .got section
+[0x601ff0] __libc_start_main@GLIBC_2.2.5 -> 0x7ffff7c58f90  ← real libc address
+[0x601ff8] __gmon_start__ -> 0
+
+# GOT (PLT) - .got.plt section  
+[0x602018] _exit@GLIBC_2.2.5 -> 0x400766
+[0x602020] puts@GLIBC_2.2.5 -> 0x400776
+[0x602028] __stack_chk_fail@GLIBC_2.4 -> 0x400786
+...
+```
+
+| Feature | GOT (non-PLT) | GOT (PLT) |
+|---------|---------------|------------|
+| Section name | `.got` | `.got.plt` |
+| သိမ်းတဲ့အရာ | Real libc addresses (resolved) | PLT stub addresses (not resolved) |
+| ဥပမာ | `__libc_start_main` | `puts`, `printf`, `__stack_chk_fail` |
+| Permission (Partial RELRO) | **Read-only** | **Writable** |
+
+##### GOT (non-plt example)
+
+
+```c
+// global variable တစ်ခု
+int global_counter = 10;
+
+int main() {
+    // ဒီ variable ကို သုံးတဲ့အခါ GOT (non-PLT) ကိုသုံးတယ်
+    global_counter = 20;  // GOT (non-PLT) ကနေ address ယူတယ်
+}
+```
+
+**Assembly မှာ**:
+```assembly
+mov eax, DWORD PTR [global_counter@GOT]  ; GOT (non-PLT) ကိုသုံးတယ်
+mov DWORD PTR [eax], 20
+```
+
+
+
+
+#### PLT VS .got.plt
+
+|              | **PLT** (Procedure Linkage Table)      | **.got.plt** (GOT for PLT)                |
+| ------------ | -------------------------------------- | ----------------------------------------- |
+|              | Code section (executable instructions) | Data section (address storage)            |
+| အလုပ်လုပ်ပုံ | Function ကို ခေါ်တဲ့ code stub         | Function address တွေ သိမ်းထားတဲ့ table    |
+| Permission   | **RX** (Read + Execute)                | **RW** (Read + Write) - Partial RELRO မှာ |
+| သိမ်းတာ      | Instructions (jmp, push, etc.)         | Addresses (function pointers)             |
+
+
+---
+
+##### Visual Diagram
+
+```
+Program Memory Layout:
+
+┌─────────────────────────────────────────────────────┐
+│ 0x400000 - 0x400750: (Other code)                  │
+├─────────────────────────────────────────────────────┤
+│ 0x400750 - 0x400820: PLT (Procedure Linkage Table) │
+│                                                     │
+│   [0x400760] _exit@plt:                            │
+│       jmp [0x602018]  ──────────────┐              │
+│       push 0                        │              │
+│       jmp 0x400750                   │              │
+│                                     │              │
+│   [0x400770] puts@plt:              │              │
+│       jmp [0x602020]  ──────────────┼──┐           │
+│       push 1                        │  │           │
+│       jmp 0x400750                   │  │           │
+│                                     │  │           │
+│   [0x400780] __stack_chk_fail@plt:  │  │           │
+│       jmp [0x602028]  ──────────────┼──┼──┐        │
+│       push 2                        │  │  │        │
+│       jmp 0x400750                   │  │  │        │
+│                                     │  │  │        │
+│ **RX (Read + Execute)**             │  │  │        │
+├─────────────────────────────────────┼──┼──┼────────┤
+│ 0x602000 - 0x602fff: .got.plt       │  │  │        │
+│                                     │  │  │        │
+│   [0x602018] ───────────────────────┘  │  │        │
+│   [0x602020] ──────────────────────────┘  │        │
+│   [0x602028] ─────────────────────────────┘        │
+│                                                     │
+│ **RW (Read + Write)**                              │
+└─────────────────────────────────────────────────────┘
+```
+
 
 ##### Step by Step
 
@@ -88,6 +200,13 @@ GOT ထဲကြည့် - လိပ်စာရှိနေပြီ
 ↓
 တန်းသွား
 ```
+
+
+| Component    | ဘာလဲ                      | သိမ်းတာ                                      | Permission      |
+| ------------ | ------------------------- | -------------------------------------------- | --------------- |
+| **PLT**      | Code section (executable) | `jmp [GOT]` လို instructions                 | **RX**          |
+| **.got.plt** | Data section              | Function addresses (သို့) PLT stub addresses | RELRO ပေါ်မူတည် |
+| **.got**     | Data section              | Global variables, real libc addresses        | RELRO ပေါ်မူတည် |
 
 #### how to use in binary Exploitation 
 
@@ -203,6 +322,12 @@ GOT protection: Partial RELRO | Found 7 GOT entries passing the filter
 pwndbg> 
 
 ```
+
+
+
+
+
+
 #### RELRO (`RELocation` Read-Only)
 
 RELRO က binary security mechanism တစ်ခုဖြစ်ပြီး GOT (Global Offset Table) ကို ကာကွယ်ပေးတဲ့ နည်းလမ်း

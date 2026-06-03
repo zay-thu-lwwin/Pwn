@@ -9,6 +9,13 @@ https://pnx.tf/files/x86_opcode_structure_and_instruction_overview.pdf
 
 
 ```
+အဆင့် 1: Opcode table ထားပါ (reference)
+အဆင့် 2: Instruction ကိုခွဲကြည့်ပါ
+အဆင့် 3: တစ်ပိုင်းချင်းတွက်ပါ
+အဆင့် 4: စုစည်းပါ
+```
+
+```
 Assembly              →        Machine Code (Binary/Hex)
 ─────────────────────────────────────────────────────────
 mov al, 0x41          →        10110000 01000001  (B0 41)
@@ -40,7 +47,7 @@ imm8 = immediate 8-bit (8-bit တန်ဖိုး)
 
 
 
-x86 CPU ရဲ့ instruction တစ်ခုရဲ့ **ပထမဆုံး byte** ကို **Opcode Byte** လို့ခေါ်တယ်။ ဒီ 1 byte ကို **နှစ်ပိုင်း** ခွဲလို့ရတယ်။
+x86 CPU ရဲ့ instruction တစ်ခုရဲ့ ပထမဆုံး byte ကို Opcode Byte လို့ခေါ်တယ်။ ဒီ 1 byte ကို နှစ်ပိုင်း ခွဲလို့ရတယ်။
 
 ```
 Opcode Byte (1 byte = 8 bits)
@@ -57,13 +64,13 @@ Opcode Byte (1 byte = 8 bits)
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**High Nibble** က "ဘယ် instruction အုပ်စုလဲ" ဆိုတာကို သတ်မှတ်တယ်။  
-**Low Nibble** က "ဘယ် register လဲ" (သို့) "ဘယ် variation လဲ" ဆိုတာကို သတ်မှတ်တယ်။
+High Nibble က "ဘယ် instruction အုပ်စုလဲ" ဆိုတာကို သတ်မှတ်တယ်
+Low Nibble က "ဘယ် register လဲ" (သို့) "ဘယ် variation လဲ" ဆိုတာကို သတ်မှတ်တယ်။
 
 
 
 
-## Nibble ဆိုတာဘာလဲ
+##### Nibble 
 
 |ဝေါဟာရ|အဓိပ္ပါယ်|အရွယ်အစား|
 |---|---|---|
@@ -89,7 +96,7 @@ Opcode Byte (1 byte = 8 bits)
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-## MOV reg8, imm8 အတွက် Opcode ဇယား
+##### MOV reg8, imm8 
 
 |Opcode|High Nibble (1011 = B)|Low Nibble|Register|
 |---|---|---|---|
@@ -102,7 +109,7 @@ Opcode Byte (1 byte = 8 bits)
 |**B6**|1011 (MOV group)|0110 (6)|**DH**|
 |**B7**|1011 (MOV group)|0111 (7)|**BH**|
 
-## 2.2 MOV reg16/32/64, imm အတွက် Opcode ဇယား
+##### MOV reg16/32/64, imm 
 
 | Opcode | High Nibble (1011 = B) | Low Nibble | 16-bit | 32-bit | 64-bit (REX.W=1) |
 | ------ | ---------------------- | ---------- | ------ | ------ | ---------------- |
