@@ -362,6 +362,20 @@ pwndbg> vmmap 0x8049fdc
 0x8049fdc rw-p ...           # Writeable
 ```
 
+```
+Address        | Section    | Permission | Content
+---------------|------------|------------|------------------
+0x400000       | .text      | RX         | Program code
+0x400750       | .plt       | RX         | PLT stubs
+0x400760       | _exit@plt  | RX         | jmp [0x602018]
+0x400770       | puts@plt   | RX         | jmp [0x602020]
+---------------|------------|------------|------------------
+0x600000       | .got       | RW         | Global variables
+0x601ff0       | .got       | RW         | __libc_start_main (real)
+0x602000       | .got.plt   | RW         | Function addresses
+0x602018       | .got.plt   | RW         | _exit (real or PLT stub)
+0x602020       | .got.plt   | RW         | puts (real or PLT stub)
+```
 
 ##### PARTIAL RELRO
 
@@ -396,7 +410,20 @@ pwndbg> x/wx 0x8049fdc
 0x8049fdc: 0xf7de1bc0        # Update ဖြစ်တယ် (RW ဖြစ်လို့)
 ```
 
-
+```
+Address        | Section    | Permission | Content
+---------------|------------|------------|------------------
+0x400000       | .text      | RX         | Program code
+0x400750       | .plt       | RX         | PLT stubs
+0x400760       | _exit@plt  | RX         | jmp [0x602018]
+0x400770       | puts@plt   | RX         | jmp [0x602020]
+---------------|------------|------------|------------------
+0x600000       | .got       | RO 🔒      | Global variables (read-only)
+0x601ff0       | .got       | RO 🔒      | __libc_start_main (real) ← fixed
+0x602000       | .got.plt   | RW         | Function addresses
+0x602018       | .got.plt   | RW         | _exit (PLT stub)
+0x602020       | .got.plt   | RW         | puts (PLT stub)
+```
 ##### FULL RELRO
 
 ```bash
@@ -423,7 +450,18 @@ pwndbg> vmmap 0x8049fdc
 0x8049fdc r--p ...           # Read-only! (မပြောင်းနိုင်)
 ```
 
-
+```
+Address        | Section    | Permission | Content
+---------------|------------|------------|------------------
+0x400000       | .text      | RX         | Program code
+0x400750       | .plt       | RX         | PLT stubs
+---------------|------------|------------|------------------
+0x600000       | .got       | RO 🔒      | Global variables
+0x601ff0       | .got       | RO 🔒      | __libc_start_main (real)
+0x602000       | .got.plt   | RO 🔒      | Function addresses
+0x602018       | .got.plt   | RO 🔒      | _exit (real, resolved early)
+0x602020       | .got.plt   | RO 🔒      | puts (real, resolved early)
+```
 
 
 ##### No PIPE
@@ -462,6 +500,14 @@ pwndbg>
 
 ```
 
+| Configuration              | .got.plt | .got   | ASLR | GOT Overwrite ရလား |
+| -------------------------- | -------- | ------ | ---- | ------------------ |
+| No PIE + No RELRO          | RW       | RW     | ✗    | ✓ (လွယ်တယ်)        |
+| **No PIE + Partial RELRO** | **RW**   | **RO** | ✗    | ✓                  |
+| No PIE + Full RELRO        | RO       | RO     | ✗    | ✗                  |
+| PIE + No RELRO             | RW       | RW     | ✓    | ✓ (ခက်တယ်)         |
+| PIE + Partial RELRO        | RW       | RO     | ✓    | ✓ (ခက်တယ်)         |
+| PIE + Full RELRO           | RO       | RO     | ✓    | ✗                  |
 
 |                | `elf.plt['printf']`                | `elf.got['printf']`                    |
 | -------------- | ---------------------------------- | -------------------------------------- |

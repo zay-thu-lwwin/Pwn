@@ -408,7 +408,7 @@ r.interactive()
 
 ```
 
-#### Guessing game 2
+#### echo_escape2
 
 ```
 File:     /home/Jackfruit/cate/learn/binary/stack/picoCTF/echo_escape2/vuln

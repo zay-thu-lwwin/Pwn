@@ -1,9 +1,15 @@
+
+```
+strings ./binary_name | grep -E "system|exxec|sh|flag|/bin/sh"
+```
+
+
+
 ```
 x/[COUNT][FORMAT][SIZE] address
 များသောအားဖြင် size က formatထက်အရင်လာ
 
- Format Letters (display format)
-		
+ Format Letters (display format)	
 
 - x - hexadecimal   
 - d - decimal  
