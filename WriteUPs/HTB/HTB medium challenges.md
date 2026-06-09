@@ -137,7 +137,7 @@ void main(int param_1,undefined8 param_2)
 
 မြင်နေကြအရာမျိုးမဟုတ်ဘူး
 `gdb` မှာ runကြည့်တော့ debugger detected တဲ့
-ဟုတ်တယ်ဟ မိုက်တော့မိုက်တယ်
+
 ```c
 pwndbg> r
 Starting program: /home/Jackfruit/cate/learn/binary/stack/htb/TicTacToed/pwn_tictactoed/tictactoe 
@@ -150,8 +150,10 @@ pwndbg>
 ```
 
 AI မေးကြည့်တော့
-
 အခု binary မှာတော့ ထူးထူးဆန်းဆန်း `alloc::raw_vec...`, `std::thread...`, `regex_automata...` ဆိုတဲ့ ရှည်လျားထွေပြားလှတဲ့ နာမည်ကြီးတွေ တန်းစီပြီး ထွက်လာတာကို တွေ့ရမယ်
-
 ဘာလို့လဲဆို ကိုင်တွယ်နေရတဲ့ binary က C သို့မဟုတ် C++ နဲ့ ရေးထားတာ မဟုတ်ဘဲ **Rust Language** နဲ့ ရေးထားတဲ့ Binary ဖြစ်နေလို့တဲ့
+
+ဆိုတော့
+ငါတို့ Custom logic တွေရှာကြည့်မယ်
+
 
