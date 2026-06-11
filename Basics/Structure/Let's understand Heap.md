@@ -233,6 +233,16 @@ Shared Area)
 - Unique CPU Registers (rip, `rax`, `etc`): CPU ပေါ်မှာ ၎င်း Thread လက်ရှိ ဘယ် assembly line ကို ရောက်နေလဲဆိုတဲ့ Instruction Pointer (rip) နဲ့ တွက်ချက်နေတဲ့ Data (Registers) တွေက Thread တစ်ခုစီအတွက် သီးသန့် ဖြစ်ပါတယ်
 - TLS (Thread Local Storage): ဒါက  **`Tcache`** ရှိတဲ့ နေရာ ဖြစ်ပါတယ် Thread တစ်ခုစီမှာ တခြားကောင်တွေ လာနှောင့်ယှက်လို့မရတဲ့ TLS ဆိုတဲ့ data ထားသိုမယ့်နေရာလေး ပါဝင်ပြီး ၎င်းထဲမှာ `tcache_perthread_struct` ကို သိမ်းဆည်းထားတာ ဖြစ်ပါတယ်
 
+##### Thread's TLS
+
+Thread တစ်ခုက `malloc(0x20)` တောင်းလိုက်တဲ့ အခြေအနေကို low-level အဆင့်ဆင့် ကြည့်ရအောင်
+
+1. `Tcache` ကို အရင်စစ်မယ် (No Lock) Thread က သူ့ရဲ့ ကိုယ်ပိုင် TLS ထဲက `Tcache` ထဲမှာ `0x20` size ရှိတဲ့ Free Chunk ရှိမရှိ အရင်ကြည့်ပါတယ်။ (ဒီနေရာမှာ ကိုယ်ပိုင်အိတ်ကပ်ထဲ ရှာတာဖြစ်လို့ တခြား Thread တွေနဲ့ လုစရာမလိုဘူး၊ Arena Lock ချစရာမလိုဘူး၊ အလွန်မြန်ပါတယ်)။
+2. `Tcache` မှာ မရှိရင် Arena ဆီသွားမယ် (Lock Required) အကယ်၍ `Tcache` ထဲမှာ အလွတ်မရှိရင် (သို့မဟုတ် မင်းပြောသလို Chunk Size က `> 0x410` ဖြစ်လို့ `Tcache` က လက်မခံရင်) အဲဒီ Thread က Global ကွင်းပြင်ဖြစ်တဲ့ Arena ဆီကို ထွက်လာရပါတော့တယ်
+3. အဲဒီအချိန်မှာ ဘယ် Arena ဆီ သွားမလဲ?
+    - သူက Main Arena ဆီကို အရင်သွားပြီး Lock ယူဖို့ ကြိုးစားပါတယ်
+    - အကယ်၍ Main Arena က အားနေရင် Main Arena ဆီကနေ Memory Chunk ကို ဖြတ်ယူပြီး Thread ဆီ ပေးလိုက်ပါတယ်။ (ပြီးရင် နောက်တစ်ခါ သုံးရလွယ်အောင် အဲဒီ chunk တွေကို Thread ရဲ့ ကိုယ်ပိုင် `Tcache` ထဲမှာပါ အပိုထည့်သိမ်းပေးလိုက်ပါသေးတယ်)
+    - အကယ်၍ Main Arena ကို တခြားကောင်က Lock ချထားလို့ (Lock Contention ဖြစ်လို့) သုံးမရရင် `ptmalloc` က အဲဒီ Thread အတွက် Non-main Arena တစ်ခုကို အသစ်ဆောက်ပေးပြီး ၎င်း Arena အသစ်ဆီကနေပဲ Memory ဖြတ်ပေးလိုက်တာ ဖြစ်ပါတယ်
 
 
 #### Allocating  From  Freed chunks (from bins)
