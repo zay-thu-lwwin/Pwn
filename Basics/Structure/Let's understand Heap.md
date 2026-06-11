@@ -170,12 +170,69 @@ int main() {
 - Main Thread စပွင့်ချိန် OS က Program ကို စ run တဲ့အခါ Main Thread ပေါ်လာပြီး Main Arena (Main Heap) ကို `brk()` နဲ့ စတင် တည်ဆောက်ပါတယ်
 - Thread 1, 2, 3 တွေ အလုပ်လုပ်ချိန်
     - Thread 1 က `malloc(100)` ကို အရင်ဆုံး လှမ်းခေါ်လိုက်တယ်။ သူက Main Arena ရဲ့ Lock ကို သွားစစ်တယ်။ အားနေရင် Main Arena ထဲကပဲ Chunk တစ်ခု ဖြတ်ပေးလိုက်မယ်
-    - Thread 2 ကလည်း တစ်ပြိုင်တည်းမှာ `malloc(100)` ထပ်ခေါ်တယ်။ ဒါပေမဲ့ Main Arena က Thread 1 ကြောင့် Lock ဖြစ်နေပြီ။ အဲဒီအခါ Thread 2 က စောင့်မနေတော့ဘဲ Thread Arena 1 (Non-main Arena) အသစ်တစ်ခုကို `mmap()` သုံးပြီး ဆောက်လိုက်တယ်။ အဲဒီ Arena ၁ ထဲက Sub-heap ထဲကနေ Chunk တစ်ခု ယူလိုက်ပါတယ်
+    - Thread 2 ကလည်း တစ်ပြိုင်တည်းမှာ `malloc(100)` ထပ်ခေါ်တယ်။ ဒါပေမဲ့ Main Arena က Thread 1 ကြောင့် Lock ဖြစ်နေပြီ။  Lock Contention(lock ပြိုင်လုတာ) ဖြစ်နေပြီ အဲဒီအခါ Thread 2 က စောင့်မနေတော့ဘဲ Thread Arena 1 (Non-main Arena) အသစ်တစ်ခုကို `mmap()` သုံးပြီး ဆောက်လိုက်တယ်။ အဲဒီ Arena 1 ထဲက Sub-heap ထဲကနေ Chunk တစ်ခု ယူလိုက်ပါတယ်
     - Thread 3 ကလည်း ထပ်ခေါ်တဲ့အခါ Main Arena ရော၊ Thread Arena 1 ရော Lock မိနေရင် သူ့အတွက် **Thread Arena 2** ကို ထပ်ဆောက်ပြီး အဲဒီထဲက Sub-heap ကနေ Chunk ထုတ်ပေးလိုက်ပါတယ်
+
+
+Glibc 2.26 နောက်ပိုင်းမှာ `tcache` ပါလာတဲ့အတွက် Thread တွေဟာ တော်ရုံတန်ရုံ `malloc` / `free` ကို ကိုယ်ပိုင် Tcache ထဲမှာတင် Lock လုံးဝမလိုဘဲ အလုပ်လုပ်နိုင်ပါတယ်။ ဒါကြောင့် Thread Arena အသစ် ဆောက်တာကို မြင်ချင်ရင် **Tcache ထက်ကြီးတဲ့ size (ဥပမာ- Chunk size > 0x410)** ကို တောင်းပြီး တစ်ပြိုင်နက်တည်း လုသုံးခိုင်းမှ Thread Arena Trigger ဖြစ်မှာပါ
+#####
+
+
+
 
 
 
 ![](heap-arenas-CS.png)
+
+
+#### What is Thread
+
+Thread ဆိုတာ Operating System က CPU ပေါ်မှာ Task တစ်ခုကို အလုပ်လုပ်ခိုင်းဖို့အတွက် ပေးလိုက်တဲ့ Lightweight Process / Unit of Execution
+
+##### Process Vs Thread
+
+- Process :  Binary တစ်ခုကို Run လိုက်တဲ့အခါ OS က သူ့အတွက် သီးသန့် Virtual Memory Space (Address Space) ကြီးတစ်ခုလုံးကို သီးသန့် ချပေးလိုက်တာ ဖြစ်ပါတယ် အဲဒီ Process ထဲမှာ `Code`, `Data`, `Heap` နဲ့ `Shared Libraries` တွေ အကုန်ပါဝင်ပြီး တခြား Process တွေက လာရောက် ကျူးကျော်ဖတ်ရှုလို့ မရပါဘူး (Isolated ဖြစ်ပါတယ်)
+    
+- Thread : Thread ဆိုတာကတော့ အဲဒီ Process ကြီးရဲ့ အတွင်းထဲမှာ တကယ့် CPU ကုဒ်တွေကို လိုက်ပြီး Run ပေးရတဲ့ ကောင်တွေ ဖြစ်ပါတယ် ပိုပြီး ထူးခြားတာက Process တစ်ခုထဲမှာ Thread ပေါင်းများစွာ (Multi-threading) ရှိနေနိုင်ပါတယ်
+
+
+##### Shared vs Unique
+
+Multi-threaded program တစ်ခု (ဥပမာ- Glibc `ptmalloc` သုံးထားတဲ့ web server တစ်ခု) အလုပ်လုပ်တဲ့အခါ Thread အားလုံးဟာ Process ရဲ့ The Process Address Space ကြီးကို အတူတူ မျှဝေသုံးစွဲကြပေမဲ့၊ သူတို့အချင်းချင်း အလုပ်ရှုပ်မကုန်အောင် Thread-Local Infrastructure (ကိုယ်ပိုင် ပစ္စည်းအချို့) ကို သီးသန့် ကိုင်ဆောင်ထားကြပါတယ်
+
+```
+       ┌────────────────────────────────────────────────────────┐
+       │             PROCESS MEMORY ADDRESS SPACE               │
+       │  ┌──────────────────────┐   ┌───────────────────────┐  │
+       │  │      Code Segment    │   │      Heap Segment     │  │
+       │  └──────────────────────┘   └───────────────────────┘  │
+       │             ▲                           ▲              │
+       │             │ (Shared)                  │ (Shared)     │
+       └─────────────┼───────────────────────────┼──────────────┘
+                     │                           │
+          ┌──────────┴──────────┐     ┌──────────┴──────────┐
+          │      THREAD 1       │     │      THREAD 2       │
+          ├─────────────────────┤     ├─────────────────────┤
+          │  Unique Stack       │     │  Unique Stack       │
+          │  Unique CPU Regs    │     │  Unique CPU Regs    │
+          │  TLS (Tcache, etc)  │     │  TLS (Tcache, etc)  │
+          └─────────────────────┘     └─────────────────────┘
+```
+
+
+Shared Area)
+
+- The Code (0x400000 ~ Text Segment): Run မယ့် machine code (Assembly Instructions) တွေဟာ အတူတူပဲ ဖြစ်လို့ Thread အားလုံးက အဲဒီ Code တွေကို လှမ်း run နိုင်တယ်
+- The Global Data (`.data` / `.bss`): Global Variable တွေ မှန်သမျှကို Thread အားလုံးက မျှဝေဖတ်ရှု/ပြင်ဆင်နိုင်တယ် (ဒီနေရာမှာ Race Condition ဆိုတဲ့ vulnerability စတင်ဖြစ်ပေါ်တတ်ပါတယ်)
+- The Heap: ဒါက အရေးကြီးပါတယ် Main Arena Heap Memory ကို Thread အားလုံးက Share လုပ်ပြီး သုံးကြတာ ဖြစ်ပါတယ်
+    
+
+ (Private/Unique Area):
+
+- Unique Stack (`rsp` / Stack Pointer): Thread တစ်ခုစီမှာ ကိုယ်ပိုင် Stack Segment တစ်ခုစီ သီးသန့်ရှိပါတယ် ဒါကြောင့် Thread A က function တစ်ခု ခေါ်နေချိန်မှာ Thread B ရဲ့ local variable တွေနဲ့ သွားပြီး ရောထွေးကုန်ခြင်း မရှိတာ ဖြစ်ပါတယ်
+- Unique CPU Registers (rip, `rax`, `etc`): CPU ပေါ်မှာ ၎င်း Thread လက်ရှိ ဘယ် assembly line ကို ရောက်နေလဲဆိုတဲ့ Instruction Pointer (rip) နဲ့ တွက်ချက်နေတဲ့ Data (Registers) တွေက Thread တစ်ခုစီအတွက် သီးသန့် ဖြစ်ပါတယ်
+- TLS (Thread Local Storage): ဒါက  **`Tcache`** ရှိတဲ့ နေရာ ဖြစ်ပါတယ် Thread တစ်ခုစီမှာ တခြားကောင်တွေ လာနှောင့်ယှက်လို့မရတဲ့ TLS ဆိုတဲ့ data ထားသိုမယ့်နေရာလေး ပါဝင်ပြီး ၎င်းထဲမှာ `tcache_perthread_struct` ကို သိမ်းဆည်းထားတာ ဖြစ်ပါတယ်
+
 
 
 #### Allocating  From  Freed chunks (from bins)
@@ -221,6 +278,8 @@ Size က `127` ဆိုရင် သူ့ရဲ့ Index (နံပါတ်) 
 | -------- | ----- | ------------------------------ |
 | Fastbins | 10    | သီးခြား array (fastbinsY[0-9]) |
 | Tcache   | 64    | Per-thread (arena အပြင်ဘက်)    |
+Tcache ကတော့ အပေါ်က Arena တွေထဲမှာ ရှိမနေပါဘူး။ Thread တစ်ခုချင်းစီရဲ့ သီးသန့် Area ဖြစ်တဲ့ **TLS (Thread Local Storage)** ထဲမှာ တည်ရှိတာ ဖြစ်ပါတယ်
+Arena တွေဆိုတာ Program တစ်ခုလုံး (Process-wide) မှာရှိတဲ့ Global Heap Memory ကွင်းပြင်ကြီးတွေ ဖြစ်ပါတယ် သူတို့က Thread တစ်ခုစီရဲ့ အတွင်းထဲမှာ ရှိတာမဟုတ်ပါဘူး Thread အားလုံး လှမ်းယူလို့ရတဲ့ နေရာမှာ ရှိနေတာပါ
 
 
 
@@ -539,7 +598,7 @@ heap
 bins
 vis
 arena
-arenas
+arenas Glibc က Arena ဘယ်နှခု ဆောက်ထားလဲဆိုတာစစ်
 f4
 ptype user
 dq &user
