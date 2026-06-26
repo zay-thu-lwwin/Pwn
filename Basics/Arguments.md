@@ -1,10 +1,8 @@
 
-
-
 ## 32-bit (x86) Program 
 	32-bit mode မှာ stack ကိုအဓိကသုံးပြီး argument တွေကို pass လုပ်ပါတယ်။
 
-	စည်းမျဉ်း (cdecl calling convention အရ
+	စည်းမျဉ်း (cdecl calling convention အရ)
 	1. Argument တွေကို ညာဘက်ကနေ ဘယ်ဘက် စီပြီး stack ထဲ push လုပ်တယ်။
 	2. Function ခေါ်ပြီးရင် caller က stack ကို cleanup လုပ်ရတယ်။
 
@@ -43,7 +41,6 @@ call func    ; return address auto push ဖြစ်မယ်
 
 ## 64-bit (x86-64)
 	64-bit mode မှာ register တွေကို အဓိက သုံးပါတယ်။ (Windows နဲ့ Linux/macOS မှာနည်းနည်းကွာတယ်၊ Linux/macOS ကို ဒီမှာပြောမယ်)
-
 	Linux/macOS (System V ABI) စည်းမျဉ်း
 	1. Integer/Pointer argument ၆ခုအထိကို register တွေနဲ့ pass လုပ်တယ်:
 	   - rdi, rsi, rdx, rcx, r8, r9 

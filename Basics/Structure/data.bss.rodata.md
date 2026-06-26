@@ -28,10 +28,10 @@ High addresses
 |                  |  ← static_local
 +------------------+
 |      Data        |  ← normal_global
-|                  |  ← static_global (init part)
+|                  |  ← static_global (init part) /static local 
 +------------------+
 |   Text (rodata)  |  ← const_global
-|                  |  ← static_const_global
+|                  |  ← static_const_global/static_const_local
 |                  |  ← string literals
 +------------------+
 Low addresses

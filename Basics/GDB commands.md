@@ -255,3 +255,67 @@ pwndbg> x/1dw &num
 
 ```
 ```
+
+
+```
+
+
+
+```
+# Disable ASLR (Address Space Layout Randomization)
+gcc example.c -o example -no-pie
+
+# Disable Stack Canary
+gcc example.c -o example -fno-stack-protector
+
+# Disable RELRO (Partial or Full)
+gcc example.c -o example -Wl,-z,relro,-z,now   # Full RELRO (default for exploit dev)
+
+# Disable all protections (for learning ONLY)
+gcc example.c -o example -no-pie -fno-stack-protector -z execstack -Wl,-z,norelro
+
+# Common for heap exploitation practice
+gcc example.c -o example -no-pie -fno-stack-protector -g
+```
+
+
+
+```
+Pwngdb Commands to see heap flow:
+
+heap
+bins
+vis
+arena
+arenas Glibc က Arena ဘယ်နှခု ဆောက်ထားလဲဆိုတာစစ်
+f4
+ptype user
+dq &user
+p user
+
+
+# Pwndbg heap commands
+heap               # Heap overview
+arena              # Arena information
+chunk $rax         # Inspect chunk at address
+bins               # Show all bins (fast, unsorted, small, large)
+fastbins           # Fastbins only
+unsortedbin        # Unsorted bin
+smallbin           # Small bins
+largebin           # Large bins
+tcachebins         # Tcache bins (glibc 2.26+)
+tracemalloc        # malloc hook tracing
+
+# Example heap debugging
+gdb-pwndbg$ heap
+gdb-pwndbg$ bins
+gdb-pwndbg$ chunk 0x555555559000
+
+
+
+heap tracking force if commnads doesn't work at first
+set resolve-heap-via-heuristic force
+vis
+heap
+arena
+```

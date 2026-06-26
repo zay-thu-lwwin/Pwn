@@ -1,0 +1,56 @@
+
+
+### Strings and null byte (\x00)
+
+string မှာ null byte ပါတယ် string ဆိုတာ character တွေလေးတွေစုစည်းထားတဲ့ကောင်
+string length ကိုသတ်မှတ်ရင် null byte အတွက်ပါထည့်ပေးရ
+`strlen`, `strcpy`, `strcat`, `printf("%s")` အားလုံးဟာ null byte ကိုရှာပြီးမှ အလုပ်လုပ်
+
+```
+char greeting[6] = {'H', 'e', 'l', 'l', 'o', '\0'};
+```
+
+
+
+### New line (\n) (\x0a)
+
+
+##### `n` (0x0A) နဲ့ `\0` (0x00) ကို function တစ်ခုချင်းစီ ဘယ်လိုသဘောထားလဲ
+
+ဒီမှာ **Logics 3 မျိုး** ရှိတယ်။
+
+1. **As a normal byte** → သာမန် data တစ်ခုလို သိမ်း ၊ ဖတ် ၊ copy လုပ်
+    
+2. **As a terminator / delimiter** → loop ရပ်၊ နောက်ထပ် မဆက်တော့
+    
+3. **As an injector / transformer** → `\n` ကို `\0` ပြောင်း (gets) ၊ `\0` ကို output မှာ ထူးခြားဆက်ဆံ
+
+| Function           | Category                  | `\n` Handling                                                | `\0` Handling                                 | Exploit Use                                                   |
+| ------------------ | ------------------------- | ------------------------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------- |
+| `gets()`           | Input                     | ကို `\0` နဲ့ replace                                         | string terminator                             | Stack buffer overflow (classic)                               |
+| `fgets()`          | Input                     | ကို buffer ထဲထည့် (keep)                                     | `\n` ရဲ့နောက်မှာ `\0` ထည့်                    | Off-by-one (rare)                                             |
+| `scanf("%s")`      | Input                     | delimiter အဖြစ်ရပ် (မသိမ်း)                                  | terminator အလိုလိုထည့်                        | Heap overflow (if large input)                                |
+| `scanf("%[^\n]")`  | Input                     | `\n` ကိုတွေ့မှရပ် (keep no)                                  | `\0` ထည့်                                     | Bypass `\n` filter                                            |
+| `getchar()`        | Input                     | character `0x0A` အနေနဲ့ return                               | (မသက်ဆိုင်)                                   | Read one byte (leak)                                          |
+| `read()` (syscall) | Input (raw)               | raw byte `0x0A` အနေနဲ့ သိမ်း                                 | `\0` မထည့်ပေး                                 | Heap/stack overflow (no null terminator)                      |
+| `strcpy()`         | Copy                      | ပုံမှန် byte `0x0A` အဖြစ် copy                               | src ရဲ့ `\0` အထိ copy                         | Off-by-one, null byte overflow                                |
+| `strncpy()`        | Copy (limited)            | ပုံမှန် copy                                                 | n bytes ပြည့်ရင် `\0` **မထည့်**               | Missing null terminator → info leak                           |
+| `strcat()`         | Concatenate               | ပုံမှန် byte အဖြစ်                                           | dest ရဲ့ `\0` နေရာကစပြီး src ကို `\0` အထိ     | Buffer overflow (chaining)                                    |
+| `strncat()`        | Concatenate (limited)     | ပုံမှန်                                                      | အနည်းဆုံး `\0` တစ်လုံးထည့်                    | Safe? still overflow possible                                 |
+| `sprintf()`        | Output (string)           | `\n`ကိုစာလုံးအဖြစ် output                                    | format string ထဲက `%s` က `\0` အထိ             | Format string (write)                                         |
+| `snprintf()`       | Output (bounded)          | `\n` ကိုစာလုံးအဖြစ်                                          | n-1 bytes ပြီးရင် `\0` ထည့်                   | Safe but can truncate                                         |
+| `printf()`         | Output (formatted)        | `\n` တွေ့ → buffer flush                                     | `%s` အတွက် `\0` အထိပဲ print                   | Format string vulnerability (leak)                            |
+| `fprintf()`        | Output (file)             | `\n` → line buffering                                        | `%s` → `\0` terminator                        | File stream exploitation                                      |
+| `puts()`           | Output (string)           | string ရဲ့အဆုံးမှာ `\n` အလိုအလျောက်ထည့်                      | `\0` အထိပဲ output                             | No direct vuln (but use with `\0` overwrite)                  |
+| `fputs()`          | Output (file)             | `\n` **မထည့်ပေး** (လိုရင်ကိုယ်တိုင်ထည့်)                     | `\0` အထိပဲ output                             | Similar to puts                                               |
+| `strchr()`         | Search                    | `\n` ကို normal char အနေနဲ့ရှာ                               | `\0` ကိုရှာရင် NULL return                    | Find newline in buffer                                        |
+| `strstr()`         | Search substring          | substring ထဲက `\n` ကိုပုံမှန်                                | `\0` termination                              | Pattern matching for ROP                                      |
+| `memcpy()`         | Memory copy               | raw byte `0x0A`                                              | `\0` ကိုလည်း raw byte အနေနဲ့ copy             | No null termination concept                                   |
+| `memmove()`        | Memory copy (overlap)     | Same as memcpy                                               | Same as memcpy                                | Same as memcpy                                                |
+| `memset()`         | Memory set                | `\n` ကို byte value `0x0A` အနေနဲ့                            | `\0` ကို byte value `0x00` အနေနဲ့             | Fill buffer with nulls or newlines                            |
+| `strtok()`         | Tokenize                  | delimiter (ဥပမာ `"\n"`) အနေနဲ့သုံးလို့ရ                      | internal static pointer ကို `\0` ထိ update    | Bypass delimiter checks                                       |
+| `open()`           | File descriptor (syscall) | `\n` ကို pathname ထဲမှာ normal byte (0x0A)                   | `\0` → path string terminator                 | Path traversal (`/proc/self/fd`), race condition (TOCTOU)     |
+| `write()`          | Output (syscall)          | raw byte `0x0A` ကို **အလိုအလျောက်မပြောင်းဘဲ** တိုက်ရိုက်ထုတ် | `\0` ကိုလည်း raw byte `0x00` အနေနဲ့ ထုတ်နိုင် | Arbitrary write (if fd可控), info leak (write to stdout/stderr) |
+| `read()`           | Input (syscall)           | raw byte `0x0A` ကိုသိမ်း                                     | `\0` **မထည့်ပေး** (manual terminate လုပ်ရ)    | Heap/stack overflow, off-by-one, no null terminator           |
+| `close()`          | Resource mgmt             | (မသက်ဆိုင်)                                                  | (မသက်ဆိုင်)                                   | Use-after-free (UAF) with fd reuse                            |
+| `lseek()`          | File offset               | (မသက်ဆိုင်)                                                  | (မသက်ဆိုင်)                                   | Arbitrary read/write (seek to controlled offset)              |

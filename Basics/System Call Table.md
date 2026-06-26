@@ -32,10 +32,6 @@
 
 #### `2. Arguments ပြင်ဆင်ရမယ်`
 
-
-
-
-
 	- System call ကိုပို့ချင်တဲ့ arguments တွေကို register တွေထဲထည့်ရပါတယ်
     32-bit Linux အတွက်
 ```

