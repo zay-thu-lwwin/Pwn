@@ -1,5 +1,9 @@
 
 1 byte = 8bit
+1 nibble = 4 bit
+so 1 byte = 2 nibble 
+1 nibble = 1 hex character (0-9) or (A-F)
+0000 -> 11111 = 0 -> F
 
 32 bit system  = 4 byte
 x86 system

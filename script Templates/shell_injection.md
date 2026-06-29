@@ -86,4 +86,3 @@ if __name__ == '__main__':
     exploit(io)
 ```
 
-```
